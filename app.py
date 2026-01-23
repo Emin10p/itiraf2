@@ -3,7 +3,7 @@ import Flask, request, render_template_string, redirect
 import logging
 import requests  # IP'den konum çekmek için
 from werkzeug.middleware.proxy_fix import ProxyFix
-
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 app = Flask(__name__)
 
 # Render gibi proxy arkasında gerçek IP'yi almak için gerekli
