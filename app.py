@@ -2,7 +2,11 @@ from flask import Flask, request, render_template_string, redirect
 import datetime
 import logging
 import requests  # IP'den konum çekmek için
+from werkzeug.middleware.proxy_fix import ProxyFix
 
+# ... (mevcut import'lar)
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 app = Flask(__name__)
 
 # Log dosyamız
