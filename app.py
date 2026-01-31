@@ -2,22 +2,26 @@ from flask import Flask, request, render_template_string, redirect
 import logging
 import requests
 import os
+import json
 from datetime import datetime
 
-# Firebase Admin SDK import'ları (en üstte olmalı)
-import firebase_admin
-from firebase_admin import credentials, db
-
-# Firebase'i başlat (kodun en başında, app'ten önce)
+# Firebase'i başlat (kodun başında)
 try:
-    cred = credentials.Certificate("serviceAccountKey.json")  # dosya proje kökünde olmalı
+    # Render'da Environment Variable varsa onu kullan
+    if 'GOOGLE_APPLICATION_CREDENTIALS' in os.environ:
+        cred = credentials.Certificate.from_service_account_info(
+            json.loads(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
+        )
+    else:
+        # Yerel test için dosya
+        cred = credentials.Certificate("serviceAccountKey.json")
+    
     firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://itiraf-a5d24-default-rtdb.firebaseio.com/'  # ← BURAYI DEĞİŞTİR (kendi realtime db url'n)
+        'databaseURL': 'https://SENIN-PROJE-ID-default-rtdb.firebaseio.com/'
     })
     print("Firebase başarıyla başlatıldı")
 except Exception as e:
-    print(f"Firebase başlatma hatası: {str(e)}")  # hata olursa konsolda gör
-    # İstersen burada logging.warning ekleyebilirsin
+    print(f"Firebase hatası: {str(e)}")
 
 # Logging ayarları
 logging.basicConfig(
