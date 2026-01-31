@@ -2,26 +2,181 @@ from flask import Flask, request, render_template_string, redirect
 import logging
 import requests
 import os
-import json
 from datetime import datetime
 
-# Firebase'i başlat (kodun başında)
+# Firebase Admin SDK import'ları (en üstte olmalı)
+import firebase_admin
+from firebase_admin import credentials, db
+
+# HOME_HTML ve NGL_HTML string'lerini EN ÜSTE koy (önce tanımlansın)
+HOME_HTML = """
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGL - Anonim Mesaj</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #000000, #1a0033);
+            color: white;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #ff00cc, #3333ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        input[type="text"] {
+            width: 80%;
+            max-width: 400px;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input[type="text"]::placeholder { color: rgba(255,255,255,0.6); }
+        button {
+            padding: 16px 50px;
+            background: linear-gradient(90deg, #ff00cc, #3333ff);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { transform: scale(1.05); }
+        .info {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>NGL Anonim</h1>
+    <p>Kullanıcı adını gir (isteğe bağlı)</p>
+    <form method="GET" action="/">
+        <input type="text" name="username" placeholder="Kullanıcı adı gir (örn: muhammedemin)" autocomplete="off">
+        <button type="submit">Devam Et</button>
+    </form>
+    <div class="info">Boş bırakırsan rastgele bir isim kullanılır</div>
+</body>
+</html>
+"""
+
+NGL_HTML = """
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGL</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #000000, #1a0033);
+            color: white;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #ff00cc, #3333ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        p { font-size: 1.3rem; opacity: 0.8; margin-bottom: 40px; }
+        textarea {
+            width: 80%;
+            max-width: 500px;
+            height: 120px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            font-size: 1.2rem;
+            resize: none;
+            outline: none;
+            backdrop-filter: blur(10px);
+        }
+        textarea::placeholder { color: rgba(255,255,255,0.6); }
+        button {
+            margin-top: 30px;
+            padding: 16px 40px;
+            background: linear-gradient(90deg, #ff00cc, #3333ff);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { transform: scale(1.05); }
+        .success {
+            font-size: 2rem;
+            margin-top: 50px;
+            animation: fadeIn 1s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    {% if success %}
+        <div class="success">✅ Mesajın gönderildi!</div>
+        <p>gizlilik esastır.</p>
+    {% else %}
+        <h1>@{{ username }}</h1>
+        <p>Anonim mesaj gönder</p>
+        <form method="POST">
+            <textarea name="message" placeholder="Buraya yaz..." required></textarea><br>
+            <button type="submit">Gönder</button>
+        </form>
+    {% endif %}
+</body>
+</html>
+"""
+
+# Firebase'i başlat (değişkenlerden sonra)
 try:
-    # Render'da Environment Variable varsa onu kullan
-    if 'GOOGLE_APPLICATION_CREDENTIALS' in os.environ:
-        cred = credentials.Certificate.from_service_account_info(
-            json.loads(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
-        )
-    else:
-        # Yerel test için dosya
-        cred = credentials.Certificate("serviceAccountKey.json")
-    
+    cred = credentials.Certificate("serviceAccountKey.json")
     firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://SENIN-PROJE-ID-default-rtdb.firebaseio.com/'
+        'databaseURL': 'https://SENIN-PROJE-ID-default-rtdb.firebaseio.com/'  # ← KENDİ DATABASE URL'İNİ BURAYA YAZ
     })
     print("Firebase başarıyla başlatıldı")
 except Exception as e:
-    print(f"Firebase hatası: {str(e)}")
+    print(f"Firebase başlatma hatası: {str(e)}")
 
 # Logging ayarları
 logging.basicConfig(
@@ -34,10 +189,6 @@ logging.basicConfig(
 )
 
 app = Flask(__name__)
-
-# HOME_HTML ve NGL_HTML aynı kalıyor (seninkini kopyala, değişiklik yok)
-
-# ... (HOME_HTML ve NGL_HTML string'lerini buraya yapıştır, uzun diye atladım)
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
