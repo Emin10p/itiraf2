@@ -170,19 +170,20 @@ NGL_HTML = """
 """
 
 # Firebase başlatma (HTML'lerden sonra)
-try:
-    if 'GOOGLE_APPLICATION_CREDENTIALS' not in os.environ:
-        raise ValueError("GOOGLE_APPLICATION_CREDENTIALS variable eksik! Render Environment'a ekle.")
+if not firebase_admin._apps:
+    try:
+        cred_dict = json.loads(os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
+        cred = credentials.Certificate(cred_dict)
 
-    cred_dict = json.loads(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
-    cred = credentials.Certificate.from_service_account_info(cred_dict)
+        firebase_admin.initialize_app(cred, {
+            "databaseURL": "https://itiraf-a5d24-default-rtdb.firebaseio.com"
+        })
 
-    firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://itiraf-a5d24-default-rtdb.firebaseio.com/'
-    })
-    logging.info("Firebase BAŞARIYLA başlatıldı (Environment Variable'dan)")
-except Exception as e:
-    logging.error(f"Firebase başlatma HATASI: {str(e)}", exc_info=True)
+        logging.info("Firebase başarıyla başlatıldı")
+    except Exception as e:
+        logging.error(f"Firebase INIT HATASI: {e}", exc_info=True)
+
+    
 
 # Logging ayarları (Firebase'den sonra)
 logging.basicConfig(
@@ -250,11 +251,12 @@ def ngl_page(username):
                     "user_agent": user_agent[:150],
                     "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S")
                 }
-                ref = db.reference('/messages')
-                ref.push(message_data)
-                logging.info("[FIREBASE] Mesaj başarıyla kaydedildi")
-            except Exception as e:
-                logging.error(f"[FIREBASE PUSH HATASI] {str(e)}")
+               if firebase_admin._apps:
+    ref = db.reference("/messages")
+    ref.push(message_data)
+else:
+    logging.error("Firebase init edilmediği için mesaj kaydedilmedi")
+
 
         return render_template_string(NGL_HTML, username=username, success=True)
 
