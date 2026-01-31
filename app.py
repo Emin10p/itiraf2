@@ -4,11 +4,43 @@ import requests
 import os
 from datetime import datetime
 
-# Firebase Admin SDK import'ları (en üstte olmalı)
+# Firebase Admin SDK import'ları
 import firebase_admin
 from firebase_admin import credentials, db
+import json  # JSON parse için
 
-# HOME_HTML ve NGL_HTML string'lerini EN ÜSTE koy (önce tanımlansın)
+# Firebase'i başlat (Render için environment variable zorunlu)
+try:
+    if 'GOOGLE_APPLICATION_CREDENTIALS' in os.environ:
+        # Render'da environment variable'dan JSON oku
+        cred_dict = json.loads(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
+        cred = credentials.Certificate.from_service_account_info(cred_dict)
+        print("Firebase credential environment variable'dan yüklendi")
+    else:
+        # Eğer yerelinde test edersen diye fallback (ama sen iptal ettin, hata versin)
+        raise ValueError("GOOGLE_APPLICATION_CREDENTIALS environment variable eksik! Render'da ekle.")
+
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': 'https://itiraf-a5d24-default-rtdb.firebaseio.com/'  # ← Senin URL'n doğru, değiştirmedim
+    })
+    print("Firebase BAŞARIYLA başlatıldı!")
+except Exception as e:
+    print(f"Firebase başlatma HATASI: {str(e)}")
+    logging.error(f"Firebase init hatası: {str(e)}")
+
+# Logging ayarları
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s | %(levelname)s | %(message)s',
+    handlers=[
+        logging.FileHandler('ngl_hacker.log', encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+
+app = Flask(__name__)
+
+# HOME_HTML ve NGL_HTML (değişiklik yok, en üstte tanımlı)
 HOME_HTML = """
 <!DOCTYPE html>
 <html lang="tr">
@@ -167,28 +199,6 @@ NGL_HTML = """
 </body>
 </html>
 """
-
-# Firebase'i başlat (değişkenlerden sonra)
-try:
-    cred = credentials.Certificate("serviceAccountKey.json")
-    firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://itiraf-a5d24-default-rtdb.firebaseio.com/'  # ← KENDİ DATABASE URL'İNİ BURAYA YAZ
-    })
-    print("Firebase başarıyla başlatıldı")
-except Exception as e:
-    print(f"Firebase başlatma hatası: {str(e)}")
-
-# Logging ayarları
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s | %(levelname)s | %(message)s',
-    handlers=[
-        logging.FileHandler('ngl_hacker.log', encoding='utf-8'),
-        logging.StreamHandler()
-    ]
-)
-
-app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
