@@ -7,23 +7,19 @@ from datetime import datetime
 # Firebase Admin SDK import'ları
 import firebase_admin
 from firebase_admin import credentials, db
-import json  # JSON parse için
+import json  # JSON parse için lazım
 
-# Firebase'i başlat (Render için environment variable zorunlu)
+# Firebase'i başlat – SADECE Render Environment Variable ile
 try:
-    if 'GOOGLE_APPLICATION_CREDENTIALS' in os.environ:
-        # Render'da environment variable'dan JSON oku
-        cred_dict = json.loads(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
-        cred = credentials.Certificate.from_service_account_info(cred_dict)
-        print("Firebase credential environment variable'dan yüklendi")
-    else:
-        # Eğer yerelinde test edersen diye fallback (ama sen iptal ettin, hata versin)
+    if 'GOOGLE_APPLICATION_CREDENTIALS' not in os.environ:
         raise ValueError("GOOGLE_APPLICATION_CREDENTIALS environment variable eksik! Render'da ekle.")
 
+    cred_dict = json.loads(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
+    cred = credentials.Certificate.from_service_account_info(cred_dict)
     firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://itiraf-a5d24-default-rtdb.firebaseio.com/'  # ← Senin URL'n doğru, değiştirmedim
+        'databaseURL': 'https://itiraf-a5d24-default-rtdb.firebaseio.com/'
     })
-    print("Firebase BAŞARIYLA başlatıldı!")
+    print("Firebase BAŞARIYLA başlatıldı (Environment Variable'dan)")
 except Exception as e:
     print(f"Firebase başlatma HATASI: {str(e)}")
     logging.error(f"Firebase init hatası: {str(e)}")
@@ -40,7 +36,7 @@ logging.basicConfig(
 
 app = Flask(__name__)
 
-# HOME_HTML ve NGL_HTML (değişiklik yok, en üstte tanımlı)
+# HOME_HTML ve NGL_HTML (değişiklik yok)
 HOME_HTML = """
 <!DOCTYPE html>
 <html lang="tr">
