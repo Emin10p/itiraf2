@@ -12,15 +12,15 @@ from firebase_admin import credentials, db
 HOME_HTML = """<!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<title>NGL - Anonim Mesaj</title>
+    <meta charset="UTF-8">
+    <title>NGL - Anonim</title>
 </head>
 <body>
-<h1>NGL Anonim</h1>
-<form method="GET" action="/">
-    <input type="text" name="username" placeholder="Kullanıcı adı">
-    <button type="submit">Devam Et</button>
-</form>
+    <h1>NGL Anonim</h1>
+    <form method="GET" action="/">
+        <input type="text" name="username" placeholder="Kullanıcı adı">
+        <button type="submit">Devam Et</button>
+    </form>
 </body>
 </html>
 """
@@ -28,12 +28,12 @@ HOME_HTML = """<!DOCTYPE html>
 NGL_HTML = """<!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<title>NGL</title>
+    <meta charset="UTF-8">
+    <title>NGL</title>
 </head>
 <body>
 {% if success %}
-    <h2>Mesaj gönderildi</h2>
+    <h2>✅ Mesaj gönderildi</h2>
 {% else %}
     <h1>@{{ username }}</h1>
     <form method="POST">
@@ -45,24 +45,33 @@ NGL_HTML = """<!DOCTYPE html>
 </html>
 """
 
-# ================= Firebase =================
-
-try:
-    cred_dict = json.loads(os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
-    cred = credentials.Certificate.from_service_account_info(cred_dict)
-
-    firebase_admin.initialize_app(cred, {
-        "databaseURL": "https://itiraf-a5d24-default-rtdb.firebaseio.com/"
-    })
-except Exception as e:
-    print("Firebase init hatası:", e)
-
 # ================= Logging =================
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(message)s"
 )
+
+# ================= Firebase =================
+
+firebase_ready = False
+
+try:
+    if "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
+        raise ValueError("GOOGLE_APPLICATION_CREDENTIALS yok")
+
+    cred_dict = json.loads(os.environ["GOOGLE_APPLICATION_CREDENTIALS"])
+    cred = credentials.Certificate.from_service_account_info(cred_dict)
+
+    firebase_admin.initialize_app(cred, {
+        "databaseURL": "https://itiraf-a5d24-default-rtdb.firebaseio.com/"
+    })
+
+    firebase_ready = True
+    logging.info("Firebase başarıyla başlatıldı")
+
+except Exception as e:
+    logging.error("Firebase başlatılamadı", exc_info=True)
 
 # ================= Flask =================
 
@@ -90,6 +99,9 @@ def ngl_page(username):
         client_ip = request.remote_addr
 
     if request.method == "POST":
+        if not firebase_ready:
+            return "Firebase bağlı değil", 500
+
         message = request.form.get("message", "").strip()
         if message:
             ref = db.reference(f"messages/{username}")
@@ -98,7 +110,7 @@ def ngl_page(username):
                 "ip": client_ip,
                 "time": datetime.utcnow().isoformat()
             })
-            logging.info(f"{username} için mesaj alındı | IP: {client_ip}")
+            logging.info(f"{username} | IP: {client_ip}")
             success = True
 
     return render_template_string(
