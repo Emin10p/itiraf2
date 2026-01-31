@@ -2,7 +2,29 @@ from flask import Flask, request, render_template_string, redirect
 import logging
 import requests
 import os
+import firebase_admin
+from firebase_admin import credentials, db
+from datetime import datetime
 
+# Firebase'i başlat (app = Flask(__name__) satırından hemen sonra koy)
+cred = credentials.Certificate("serviceAccountKey.json")  # ← bu dosyayı aşağıda anlatacağım
+firebase_admin.initialize_app(cred, {
+    'databaseURL': 'https://SENIN-PROJE-ID.firebaseio.com/'  # ← senin realtime db url'n
+})
+
+# POST bloğunda, if msg: kısmının içine ekle (logging.info'dan sonra)
+message_data = {
+    "username": username,
+    "message": msg,
+    "ip": client_ip,
+    "location": location,
+    "isp": isp,
+    "user_agent": user_agent[:150],
+    "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+}
+
+ref = db.reference('/messages')
+ref.push(message_data)  # otomatik unique key ile ekler
 # Logging ayarları – Render için hem dosya hem konsol
 logging.basicConfig(
     level=logging.INFO,
