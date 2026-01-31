@@ -172,7 +172,7 @@ NGL_HTML = """
 try:
     cred = credentials.Certificate("serviceAccountKey.json")
     firebase_admin.initialize_app(cred, {
-        'databaseURL': 'https://SENIN-PROJE-ID-default-rtdb.firebaseio.com/'  # ← KENDİ DATABASE URL'İNİ BURAYA YAZ
+        'databaseURL': 'https://itiraf-a5d24-default-rtdb.firebaseio.com/'  # ← KENDİ DATABASE URL'İNİ BURAYA YAZ
     })
     print("Firebase başarıyla başlatıldı")
 except Exception as e:
