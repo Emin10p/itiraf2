@@ -51,8 +51,8 @@ HOME_HTML = """
             <button type="submit">Gönder</button>
         </form>
         <a href="https://instagram.com/itiraf_ipal">
-    <img src="https://i.imgur.com/wTYYtce.png" style="width: 50px;">
-</a>
+            <img src="https://i.imgur.com/CmALGyH.png" style="width: 50px;">
+        </a>
         <div class="footer">Bu site itiraf_ipal tarafından yapılmıştır tüm hakları saklıdır©</div>
     {% endif %}
 </body>
@@ -99,7 +99,7 @@ MESAJLAR_HTML = """
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
-            padding: 90px 30px 60px; /* üst boşluk artırıldı */
+            padding: 90px 30px 60px;
         }
         .story-preview::before {
             content: '';
@@ -124,12 +124,12 @@ MESAJLAR_HTML = """
             padding: 25px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
             margin-bottom: 40px;
-            overflow: hidden; /* taşmayı önle */
+            overflow: hidden;
         }
         .username {
-            font-size: 1.8rem; /* küçültüldü */
+            font-size: 1.8rem;
             font-weight: bold;
-            margin-bottom: 8px; /* üste kaydırıldı */
+            margin-bottom: 8px;
             text-shadow: 0 2px 10px rgba(0,0,0,0.6);
             text-align: center;
             width: 100%;
@@ -138,7 +138,7 @@ MESAJLAR_HTML = """
             font-size: 1.6rem;
             line-height: 1.5;
             text-align: center;
-            overflow-wrap: break-word; /* uzun mesaj taşmasın */
+            overflow-wrap: break-word;
             word-break: break-word;
             hyphens: auto;
         }
@@ -187,7 +187,7 @@ MESAJLAR_HTML = """
                         <div class="message">{{ msg.message }}</div>
                     </div>
                     <div class="footer">@itiraf_ipal</div>
-                    <div class="admin-footer">@itiraf_ipal tarafından tasarlandı.</div>
+                    <div class="admin-footer">@itiraf_jpal tarafından tasarlandı.</div>
                     <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Story'ye Kaydet (İndir)</button>
                 </div>
             {% endfor %}
@@ -203,7 +203,6 @@ MESAJLAR_HTML = """
             for (let btn of buttons) {
                 btn.style.display = 'none';
             }
-
             html2canvas(box, {
                 scale: 4,
                 backgroundColor: null,
@@ -216,7 +215,6 @@ MESAJLAR_HTML = """
                 link.download = 'ngl_story_mesaj.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-
                 for (let btn of buttons) {
                     btn.style.display = 'block';
                 }
@@ -353,7 +351,7 @@ def home():
 
 @app.route('/mesajlar')
 def mesajlar():
-    return render_template_string(MESAJLAR_HTML, messages=messages)
+    return render_template_string(MESAJLAR_HTML, messages=reversed(messages))  # ← YENİ GELEN ÜSTTE OLSUN
 
 @app.route('/logs')
 def logs():
