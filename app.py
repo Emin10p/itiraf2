@@ -4,7 +4,6 @@ import requests
 import os
 from datetime import datetime
 
-# Logging ayarları
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s | %(levelname)s | %(message)s',
@@ -16,10 +15,9 @@ logging.basicConfig(
 
 app = Flask(__name__)
 
-# Gelen mesajları burada tut (basit liste, sunucu yeniden başladığında sıfırlanır)
+# Mesajları tut
 messages = []
 
-# Ana sayfa HTML (kullanıcı adı + mesaj kutusu bir arada)
 HOME_HTML = """
 <!DOCTYPE html>
 <html lang="tr">
@@ -28,70 +26,16 @@ HOME_HTML = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>itiraf_ipal</title>
     <style>
-        body {
-            background: linear-gradient(135deg, #000000, #1a0033);
-            color: white;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        h1 {
-            font-size: 4rem;
-            font-weight: 800;
-            margin-bottom: 20px;
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        input[type="text"], textarea {
-            width: 80%;
-            max-width: 500px;
-            padding: 15px;
-            font-size: 1.2rem;
-            border: none;
-            border-radius: 16px;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            margin-bottom: 20px;
-        }
+        body { background: linear-gradient(135deg, #000000, #1a0033); color: white; font-family: 'Helvetica Neue', Arial, sans-serif; text-align: center; margin: 0; padding: 20px; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        h1 { font-size: 4rem; font-weight: 800; margin-bottom: 20px; background: linear-gradient(90deg, #ff00cc, #3333ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        input[type="text"], textarea { width: 80%; max-width: 500px; padding: 15px; font-size: 1.2rem; border: none; border-radius: 16px; background: rgba(255,255,255,0.1); color: white; margin-bottom: 20px; }
         input[type="text"]::placeholder, textarea::placeholder { color: rgba(255,255,255,0.6); }
-        textarea {
-            height: 120px;
-            resize: none;
-        }
-        button {
-            padding: 16px 50px;
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+        textarea { height: 120px; resize: none; }
+        button { padding: 16px 50px; background: linear-gradient(90deg, #ff00cc, #3333ff); color: white; border: none; border-radius: 50px; font-size: 1.3rem; font-weight: bold; cursor: pointer; transition: 0.3s; }
         button:hover { transform: scale(1.05); }
-        .info, .footer {
-            margin-top: 30px;
-            font-size: 0.9rem;
-            opacity: 0.7;
-            color: #ccc;
-        }
-        .success {
-            font-size: 2rem;
-            margin-top: 50px;
-            animation: fadeIn 1s;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .info, .footer { margin-top: 30px; font-size: 0.9rem; opacity: 0.7; color: #ccc; }
+        .success { font-size: 2rem; margin-top: 50px; animation: fadeIn 1s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -113,85 +57,51 @@ HOME_HTML = """
 </html>
 """
 
-# Mesajlar sayfası HTML – kutucuklar burada listelenecek
 MESAJLAR_HTML = """
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>itiraf_ipal - Gelen Mesajlar</title>
+    <title>itiraf_ipal - Mesajlar</title>
     <style>
-        body {
-            background: linear-gradient(135deg, #000000, #1a0033);
-            color: white;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            font-size: 3rem;
-            margin-bottom: 30px;
-            background: linear-gradient(90deg, #ff00cc, #3333ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        body { background: linear-gradient(135deg, #000000, #1a0033); color: white; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 20px; }
+        h1 { text-align: center; font-size: 3rem; margin-bottom: 30px; background: linear-gradient(90deg, #ff00cc, #3333ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .message-box {
-            background: rgba(255,255,255,0.1);
+            background: linear-gradient(135deg, #ff00cc, #3333ff);
             border-radius: 16px;
             padding: 20px;
             margin-bottom: 20px;
             max-width: 600px;
             margin-left: auto;
             margin-right: auto;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .username {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #ff00cc;
-        }
-        .message {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-        }
-        .footer {
-            font-size: 0.9rem;
-            opacity: 0.7;
-            text-align: center;
-            margin-top: 10px;
-        }
-        .share-btn {
-            background: #ff00cc;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
             color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 50px;
-            cursor: pointer;
-            margin-top: 10px;
         }
+        .username { font-size: 1.8rem; font-weight: bold; margin-bottom: 10px; }
+        .message { font-size: 1.4rem; margin-bottom: 10px; }
+        .footer { font-size: 0.9rem; opacity: 0.8; text-align: center; margin-top: 10px; }
+        .share-btn { background: white; color: #ff00cc; border: none; padding: 12px 30px; border-radius: 50px; cursor: pointer; font-weight: bold; margin-top: 15px; display: block; margin-left: auto; margin-right: auto; }
     </style>
 </head>
 <body>
     <h1>Gelen Mesajlar</h1>
-    {% for msg in messages %}
-        <div class="message-box">
-            <div class="username">@{{ msg.username or 'Anonim' }}</div>
-            <div class="message">{{ msg.message }}</div>
-            <div class="footer">NGL by itiraf_ipal admini :)</div>
-            <button class="share-btn" onclick="navigator.share({title: 'NGL Mesaj', text: '@{{ msg.username }}: {{ msg.message }}'})">Instagram'a Paylaş</button>
-        </div>
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="message-box">
+                <div class="username">@{{ msg.username or 'Anonim' }}</div>
+                <div class="message">{{ msg.message }}</div>
+                <div class="footer">sent with ♥ from team NGL by itiraf_ipal</div>
+                <button class="share-btn" onclick="navigator.share({title: 'NGL Mesaj', text: '@{{ msg.username }}: {{ msg.message }}'})">Instagram'a Paylaş</button>
+            </div>
+        {% endfor %}
     {% else %}
         <p>Henüz mesaj yok.</p>
-    {% endfor %}
+    {% endif %}
 </body>
 </html>
 """
 
-# Gelen mesajları tutacak liste (sunucu yeniden başladığında sıfırlanır)
 messages = []
 
 @app.route('/', methods=['GET', 'POST'])
@@ -232,14 +142,9 @@ def home():
             logging.info(log_entry)
             print(f"[YENİ MESAJ] {log_entry}")
 
-            # Mesajı listeye ekle
             messages.append({
                 "username": username or 'Anonim',
                 "message": msg,
-                "ip": client_ip,
-                "location": location,
-                "isp": isp,
-                "user_agent": user_agent,
                 "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S")
             })
 
