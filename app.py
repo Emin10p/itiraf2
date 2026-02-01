@@ -251,10 +251,10 @@ def home():
             })
 
             # Telegram'a bildirim gönder (yeni mesaj geldiğinde)
-            telegram_token = "8273909643:AAGuxhXLAr4sQainh0LiDmizHe6TyGRK7zo"  # ← BotFather'dan aldığın token'ı buraya yapıştır
-            telegram_chat_id = "5952518860"  # ← getUpdates ile aldığın chat ID'yi buraya yapıştır
+            telegram_token = "8273909643:AAGuxhXLAr4sQainh0LiDmizHe6TyGRK7zo"
+            telegram_chat_id = "5952518860"
 
-            if telegram_token != "8273909643:AAGuxhXLAr4sQainh0LiDmizHe6TyGRK7zo" and telegram_chat_id != "5952518860":
+            if telegram_token and telegram_chat_id:
                 message_text = f"Yeni mesaj geldi!\n\nKullanıcı: @{username or 'Anonim'}\nMesaj: {msg}\nZaman: {datetime.now().strftime('%H:%M %d.%m.%Y')}"
                 url = f"https://api.telegram.org/bot{telegram_token}/sendMessage"
                 payload = {
@@ -263,8 +263,11 @@ def home():
                     "parse_mode": "HTML"
                 }
                 try:
-                    requests.post(url, json=payload)
-                    logging.info("[TELEGRAM] Bildirim gönderildi")
+                    response = requests.post(url, json=payload)
+                    if response.status_code == 200:
+                        logging.info("[TELEGRAM] Bildirim başarıyla gönderildi")
+                    else:
+                        logging.error(f"[TELEGRAM HATASI] Status: {response.status_code} - {response.text}")
                 except Exception as e:
                     logging.error(f"[TELEGRAM HATASI] {str(e)}")
 
