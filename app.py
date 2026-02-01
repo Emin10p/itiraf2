@@ -88,7 +88,7 @@ MESAJLAR_HTML = """
             min-height: 800px;
             margin: 20px auto;
             background: linear-gradient(135deg, #ff00cc, #8a2be2, #4b0082);
-            border-radius: 12px; /* keskin köşeler */
+            border-radius: 12px;
             box-shadow: 0 15px 50px rgba(255, 0, 204, 0.4);
             color: white;
             position: relative;
@@ -97,7 +97,7 @@ MESAJLAR_HTML = """
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
-            padding: 80px 30px 60px;
+            padding: 100px 30px 60px;
         }
         .story-preview::before {
             content: '';
@@ -124,9 +124,9 @@ MESAJLAR_HTML = """
             margin-bottom: 40px;
         }
         .username {
-            font-size: 2.4rem;
+            font-size: 1.9rem; /* küçültüldü */
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 10px; /* üste kaydırıldı */
             text-shadow: 0 2px 10px rgba(0,0,0,0.6);
             text-align: center;
         }
@@ -199,7 +199,7 @@ MESAJLAR_HTML = """
 
             html2canvas(box, {
                 scale: 4,
-                backgroundColor: null,
+                backgroundColor: null, // şeffaf arka plan (siyah/beyaz kenar yok)
                 useCORS: true,
                 logging: false,
                 windowWidth: box.scrollWidth,
@@ -214,7 +214,7 @@ MESAJLAR_HTML = """
                     btn.style.display = 'block';
                 }
             }).catch(err => {
-                alert("Resim oluşturulamadı: " + err);
+                alert("Resim oluşturulamadı: " + err + " (Uzun bas kaydetmeyi dene)");
                 for (let btn of buttons) {
                     btn.style.display = 'block';
                 }
