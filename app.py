@@ -51,7 +51,7 @@ HOME_HTML = """
             <button type="submit">Gönder</button>
         </form>
         <a href="https://instagram.com/itiraf_ipal">
-    <img src="https://imgur.com/a/LOfOZoZ" alt="Instagram" style="width: 50px;">
+    <img src="https://i.imgur.com/wTYYtce.png" style="width: 50px;">
 </a>
         <div class="footer">Bu site itiraf_ipal tarafından yapılmıştır tüm hakları saklıdır©</div>
     {% endif %}
