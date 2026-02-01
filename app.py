@@ -76,8 +76,8 @@ MESAJLAR_HTML = """
         }
         h1 {
             text-align: center;
-            font-size: 2.1rem;
-            margin: 10px 0 30px;
+            font-size: 2.5rem;
+            margin: 40px 0 30px;
             background: linear-gradient(90deg, #ff00cc, #00ffff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -97,7 +97,7 @@ MESAJLAR_HTML = """
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
-            padding: 100px 30px 60px;
+            padding: 90px 30px 60px; /* üst boşluk artırıldı */
         }
         .story-preview::before {
             content: '';
@@ -117,23 +117,28 @@ MESAJLAR_HTML = """
             aspect-ratio: 16 / 9;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 30px;
+            justify-content: flex-start;
+            align-items: flex-start;
+            padding: 25px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
             margin-bottom: 40px;
+            overflow: hidden; /* taşmayı önle */
         }
         .username {
-            font-size: 1.9rem; /* küçültüldü */
+            font-size: 1.8rem; /* küçültüldü */
             font-weight: bold;
-            margin-bottom: 10px; /* üste kaydırıldı */
+            margin-bottom: 8px; /* üste kaydırıldı */
             text-shadow: 0 2px 10px rgba(0,0,0,0.6);
             text-align: center;
+            width: 100%;
         }
         .message {
-            font-size: 1.8rem;
-            line-height: 1.6;
+            font-size: 1.6rem;
+            line-height: 1.5;
             text-align: center;
+            overflow-wrap: break-word; /* uzun mesaj taşmasın */
+            word-break: break-word;
+            hyphens: auto;
         }
         .footer {
             font-size: 1.1rem;
@@ -199,7 +204,7 @@ MESAJLAR_HTML = """
 
             html2canvas(box, {
                 scale: 4,
-                backgroundColor: null, // şeffaf arka plan (siyah/beyaz kenar yok)
+                backgroundColor: null,
                 useCORS: true,
                 logging: false,
                 windowWidth: box.scrollWidth,
@@ -214,7 +219,7 @@ MESAJLAR_HTML = """
                     btn.style.display = 'block';
                 }
             }).catch(err => {
-                alert("Resim oluşturulamadı: " + err + " (Uzun bas kaydetmeyi dene)");
+                alert("Resim oluşturulamadı: " + err);
                 for (let btn of buttons) {
                     btn.style.display = 'block';
                 }
