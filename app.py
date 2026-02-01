@@ -15,7 +15,7 @@ logging.basicConfig(
 
 app = Flask(__name__)
 
-# Mesajları tut
+# Mesajları tut (restart olunca sıfırlanır)
 messages = []
 
 HOME_HTML = """
@@ -93,7 +93,7 @@ MESAJLAR_HTML = """
                 <div class="username">@{{ msg.username or 'Anonim' }}</div>
                 <div class="message">{{ msg.message }}</div>
                 <div class="footer">sent with ♥ from team NGL by itiraf_ipal</div>
-                <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Resmi İndir (Instagram için)</button>
+                <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Kutuyu Resim Olarak İndir</button>
             </div>
         {% endfor %}
     {% else %}
@@ -103,30 +103,16 @@ MESAJLAR_HTML = """
     <script>
         function downloadBox(boxId) {
             const box = document.getElementById(boxId);
-            html2canvas(box).then(canvas => {
+            html2canvas(box, {scale: 2}).then(canvas => {
                 const link = document.createElement('a');
                 link.download = 'ngl_mesaj.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
+            }).catch(err => {
+                alert("Resim oluşturulamadı: " + err);
             });
         }
     </script>
-</body>
-</html>
-"""
-    <h1>Gelen Mesajlar</h1>
-    {% if messages %}
-        {% for msg in messages %}
-            <div class="message-box">
-                <div class="username">@{{ msg.username or 'Anonim' }}</div>
-                <div class="message">{{ msg.message }}</div>
-                <div class="footer">sent with ♥ from team NGL by itiraf_ipal</div>
-                <button class="share-btn" onclick="navigator.share({title: 'NGL Mesaj', text: '@{{ msg.username }}: {{ msg.message }}'})">Instagram'a Paylaş</button>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>Henüz mesaj yok.</p>
-    {% endif %}
 </body>
 </html>
 """
