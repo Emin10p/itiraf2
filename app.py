@@ -51,7 +51,7 @@ HOME_HTML = """
             <button type="submit">Gönder</button>
         </form>
         <a href="https://instagram.com/itiraf_ipal">
-            <img src="https://i.imgur.com/CmALGyH.png" style="width: 50px;">
+            <img src="https://i.imgur.com/wTYYtce.png" style="width: 50px;">
         </a>
         <div class="footer">Bu site itiraf_ipal tarafından yapılmıştır tüm hakları saklıdır©</div>
     {% endif %}
@@ -68,112 +68,17 @@ MESAJLAR_HTML = """
     <title>itiraf_ipal - Mesajlar</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body {
-            background: linear-gradient(135deg, #0f001a, #1a0033, #2a004d, #4b0082);
-            color: white;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-        }
-        h1 {
-            text-align: center;
-            font-size: 2.5rem;
-            margin: 40px 0 30px;
-            background: linear-gradient(90deg, #ff00cc, #00ffff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .story-preview {
-            width: 90%;
-            max-width: 400px;
-            min-height: 800px;
-            margin: 20px auto;
-            background: linear-gradient(135deg, #ff00cc, #8a2be2, #4b0082);
-            border-radius: 12px;
-            box-shadow: 0 15px 50px rgba(255, 0, 204, 0.4);
-            color: white;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            padding: 90px 30px 60px;
-        }
-        .story-preview::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 60%);
-            opacity: 0.5;
-            pointer-events: none;
-        }
-        .inner-box {
-            background: rgba(0, 0, 0, 0.45);
-            border-radius: 16px;
-            width: 90%;
-            aspect-ratio: 16 / 9;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: flex-start;
-            padding: 25px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-            margin-bottom: 40px;
-            overflow: hidden;
-        }
-        .username {
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin-bottom: 8px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.6);
-            text-align: center;
-            width: 100%;
-        }
-        .message {
-            font-size: 1.6rem;
-            line-height: 1.5;
-            text-align: center;
-            overflow-wrap: break-word;
-            word-break: break-word;
-            hyphens: auto;
-        }
-        .footer {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            text-align: center;
-            margin-top: auto;
-            padding-top: 30px;
-        }
-        .admin-footer {
-            font-size: 0.9rem;
-            opacity: 0.6;
-            text-align: center;
-            margin-top: 60px;
-            color: #ddd;
-        }
-        .download-btn {
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: 2px solid white;
-            padding: 14px 40px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: bold;
-            margin: 30px auto;
-            font-size: 1.1rem;
-            backdrop-filter: blur(5px);
-            transition: all 0.3s;
-        }
-        .download-btn:hover {
-            background: white;
-            color: #ff00cc;
-            transform: scale(1.05);
-        }
+        body { background: linear-gradient(135deg, #0f001a, #1a0033, #2a004d, #4b0082); color: white; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; min-height: 100vh; }
+        h1 { text-align: center; font-size: 2.5rem; margin: 40px 0 30px; background: linear-gradient(90deg, #ff00cc, #00ffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .story-preview { width: 90%; max-width: 400px; min-height: 800px; margin: 20px auto; background: linear-gradient(135deg, #ff00cc, #8a2be2, #4b0082); border-radius: 12px; box-shadow: 0 15px 50px rgba(255, 0, 204, 0.4); color: white; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 90px 30px 60px; }
+        .story-preview::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 60%); opacity: 0.5; pointer-events: none; }
+        .inner-box { background: rgba(0, 0, 0, 0.45); border-radius: 16px; width: 90%; aspect-ratio: 16 / 9; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); margin-bottom: 40px; }
+        .username { font-size: 1.9rem; font-weight: bold; margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.6); text-align: center; width: 100%; }
+        .message { font-size: 1.6rem; line-height: 1.5; text-align: center; overflow-wrap: break-word; word-break: break-word; hyphens: auto; }
+        .footer { font-size: 1.1rem; opacity: 0.9; text-align: center; margin-top: auto; padding-top: 30px; }
+        .admin-footer { font-size: 0.85rem; opacity: 0.6; text-align: center; margin-top: 40px; color: #ddd; }
+        .download-btn { background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 14px 40px; border-radius: 50px; cursor: pointer; font-weight: bold; margin: 30px auto; font-size: 1.1rem; backdrop-filter: blur(5px); transition: all 0.3s; }
+        .download-btn:hover { background: white; color: #ff00cc; transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -187,7 +92,7 @@ MESAJLAR_HTML = """
                         <div class="message">{{ msg.message }}</div>
                     </div>
                     <div class="footer">@itiraf_ipal</div>
-                    <div class="admin-footer">@itiraf_jpal tarafından tasarlandı.</div>
+                    <div class="admin-footer">@ipal_itiraf tarafından tasarlandı</div>
                     <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Story'ye Kaydet (İndir)</button>
                 </div>
             {% endfor %}
@@ -345,13 +250,31 @@ def home():
                 "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S")
             })
 
+            # Telegram'a bildirim gönder (yeni mesaj geldiğinde)
+            telegram_token = "8273909643:AAGuxhXLAr4sQainh0LiDmizHe6TyGRK7zo"  # ← BotFather'dan aldığın token'ı buraya yapıştır
+            telegram_chat_id = "5952518860"  # ← getUpdates ile aldığın chat ID'yi buraya yapıştır
+
+            if telegram_token != "8273909643:AAGuxhXLAr4sQainh0LiDmizHe6TyGRK7zo" and telegram_chat_id != "5952518860":
+                message_text = f"Yeni mesaj geldi!\n\nKullanıcı: @{username or 'Anonim'}\nMesaj: {msg}\nZaman: {datetime.now().strftime('%H:%M %d.%m.%Y')}"
+                url = f"https://api.telegram.org/bot{telegram_token}/sendMessage"
+                payload = {
+                    "chat_id": telegram_chat_id,
+                    "text": message_text,
+                    "parse_mode": "HTML"
+                }
+                try:
+                    requests.post(url, json=payload)
+                    logging.info("[TELEGRAM] Bildirim gönderildi")
+                except Exception as e:
+                    logging.error(f"[TELEGRAM HATASI] {str(e)}")
+
             return render_template_string(HOME_HTML, username=username, success=True)
 
     return render_template_string(HOME_HTML, username=username, success=False)
 
 @app.route('/mesajlar')
 def mesajlar():
-    return render_template_string(MESAJLAR_HTML, messages=reversed(messages))  # ← YENİ GELEN ÜSTTE OLSUN
+    return render_template_string(MESAJLAR_HTML, messages=messages)
 
 @app.route('/logs')
 def logs():
