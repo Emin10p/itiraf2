@@ -217,7 +217,7 @@ def ngl_page(username):
         msg = request.form.get('message', '').strip()
         if msg:
             # Discord webhook linkini buraya koy (kendi webhook'unu al)
-                discord_webhook = "https://discord.com/api/webhooks/xxxxxxxxxx/xxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # ← burayı değiştir
+                discord_webhook = "https://discordapp.com/api/webhooks/1467529164444668037/u22KPPoEIghrxWupLJrwcDDUV3F8u-3b_Y_wOTOqpP7rA7lUJH6aKL1P85rUeuNAhq8z"  # ← burayı değiştir
 
                if discord_webhook and msg:
                    embed = {
