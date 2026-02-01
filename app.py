@@ -2,28 +2,7 @@ from flask import Flask, request, render_template_string, redirect
 import logging
 import requests
 import os
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyANt-B5fpsf12GI7ORByIC71HB-bVfpDmA",
-  authDomain: "itiraf-a5d24.firebaseapp.com",
-  databaseURL: "https://itiraf-a5d24-default-rtdb.firebaseio.com",
-  projectId: "itiraf-a5d24",
-  storageBucket: "itiraf-a5d24.firebasestorage.app",
-  messagingSenderId: "706587730151",
-  appId: "1:706587730151:web:c98cf02924e17419348242",
-  measurementId: "G-D7WQRMJR8Z"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 # Logging ayarları – hem dosyaya hem Render konsoluna yazsın
 logging.basicConfig(
     level=logging.INFO,
