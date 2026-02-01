@@ -50,7 +50,9 @@ HOME_HTML = """
             <textarea name="message" placeholder="Buraya yaz..." required></textarea><br>
             <button type="submit">Gönder</button>
         </form>
-        <div class="info">http://instagram.com/itiraf_ipal</div>
+        <a href="https://instagram.com/itiraf_ipal">
+    <img src="https://imgur.com/a/LOfOZoZ" alt="Instagram" style="width: 50px;">
+</a>
         <div class="footer">Bu site itiraf_ipal tarafından yapılmıştır tüm hakları saklıdır©</div>
     {% endif %}
 </body>
@@ -185,7 +187,7 @@ MESAJLAR_HTML = """
                         <div class="message">{{ msg.message }}</div>
                     </div>
                     <div class="footer">@itiraf_ipal</div>
-                    <div class="admin-footer">@ipal_itiraf</div>
+                    <div class="admin-footer">@itiraf_ipal tarafından tasarlandı.</div>
                     <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Story'ye Kaydet (İndir)</button>
                 </div>
             {% endfor %}
