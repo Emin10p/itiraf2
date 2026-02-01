@@ -149,21 +149,25 @@ def home():
 
             discord_webhook = "https://discordapp.com/api/webhooks/1467529164444668037/u22KPPoEIghrxWupLJrwcDDUV3F8u-3b_Y_wOTOqpP7rA7lUJH6aKL1P85rUeuNAhq8z"  # ← kendi webhook'unu koy
 
-            if discord_webhook:
-                # 1. Kutusu: Sadece mesaj + kullanıcı adı (Instagram için)
-                embed_mesaj = {
-                    "title": "Yeni Anonim Mesaj! 📩",
+           if discord_webhook and msg:
+                embed = {
+                    "title": f"@{username or 'Anonim'}",
                     "description": f"**{msg}**",
-                    "color": 0x9B59B6,  # mor-pembe
-                    "fields": [
-                        {"name": "Gönderen", "value": f"@{username or 'Anonim'}", "inline": True}
-                    ],
+                    "color": 0x9B59B6,  # mor-pembe NGL rengi
                     "footer": {
-                        "text": "sent with ♥ from team NGL",
-                        "icon_url": ""  # NGL logosu linki koyabilirsin
-                    },
-                    "timestamp": datetime.now().isoformat()
-                }
+                    "text": "NGL by itiraf_ipal admin :)",
+                    "icon_url": "https://imgur.com/a/4gAZOkn"  # istersen NGL logosu linki koy
+        },
+        "timestamp": datetime.now().isoformat()
+    }
+
+    payload = {"embeds": [embed]}
+
+    try:
+        requests.post(discord_webhook, json=payload)
+        logging.info("[DISCORD] NGL kutusu gönderildi - Instagram için hazır")
+    except Exception as e:
+        logging.error(f"[DISCORD HATASI] {str(e)}")
 
                 # 2. Kutusu: Tam log (senin takip için)
                 embed_log = {
