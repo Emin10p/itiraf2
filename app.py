@@ -16,14 +16,14 @@ logging.basicConfig(
 
 app = Flask(__name__)
 
-# Ana sayfa HTML – kullanıcı adı + mesaj kutusu bir arada
+# Tek sayfa HTML – kullanıcı adı + mesaj kutusu + alt yazı
 HOME_HTML = """
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NGL - Anonim Mesaj</title>
+    <title>itiraf_ipal</title>
     <style>
         body {
             background: linear-gradient(135deg, #000000, #1a0033);
@@ -74,7 +74,7 @@ HOME_HTML = """
             transition: 0.3s;
         }
         button:hover { transform: scale(1.05); }
-        .info {
+        .info, .footer {
             margin-top: 30px;
             font-size: 0.9rem;
             opacity: 0.7;
@@ -104,6 +104,7 @@ HOME_HTML = """
             <button type="submit">Gönder</button>
         </form>
         <div class="info">Kullanıcı adı boş bırakılırsa anonim kalır</div>
+        <div class="footer">Bu site itiraf_ipal tarafından yapılmıştır</div>
     {% endif %}
 </body>
 </html>
@@ -137,67 +138,4 @@ def home():
                     if geo.get('status') == 'success':
                         city = geo.get('city', 'Bilinmiyor')
                         region = geo.get('regionName', '')
-                        country = geo.get('country', '')
-                        location = f"{city}, {region}, {country}"
-                        isp = geo.get('isp', 'Bilinmiyor')
-                except:
-                    pass
-
-            log_entry = f"@{username or 'Anonim'} | MESAJ: {msg} | IP: {client_ip} | KONUM: {location} | ISP: {isp} | UA: {user_agent}"
-            logging.info(log_entry)
-            print(f"[YENİ MESAJ] {log_entry}")
-
-            discord_webhook = "https://discordapp.com/api/webhooks/1467529164444668037/u22KPPoEIghrxWupLJrwcDDUV3F8u-3b_Y_wOTOqpP7rA7lUJH6aKL1P85rUeuNAhq8z"  # ← kendi webhook'unu koy
-
-           if discord_webhook and msg:
-                embed = {
-                    "title": f"@{username or 'Anonim'}",
-                    "description": f"**{msg}**",
-                    "color": 0x9B59B6,  # mor-pembe NGL rengi
-                    "footer": {
-                    "text": "NGL by itiraf_ipal admin :)",
-                    "icon_url": "https://imgur.com/a/4gAZOkn"  # istersen NGL logosu linki koy
-        },
-        "timestamp": datetime.now().isoformat()
-    }
-
-    payload = {"embeds": [embed]}
-
-    try:
-        requests.post(discord_webhook, json=payload)
-        logging.info("[DISCORD] NGL kutusu gönderildi - Instagram için hazır")
-    except Exception as e:
-        logging.error(f"[DISCORD HATASI] {str(e)}")
-
-                # 2. Kutusu: Tam log (senin takip için)
-                embed_log = {
-                    "title": "Mesaj Logu 🔍",
-                    "color": 0x2C3E50,  # koyu
-                    "fields": [
-                        {"name": "Kullanıcı Adı", "value": f"@{username or 'Anonim'}", "inline": True},
-                        {"name": "Mesaj", "value": msg, "inline": False},
-                        {"name": "IP", "value": client_ip, "inline": True},
-                        {"name": "Konum", "value": location, "inline": True},
-                        {"name": "ISP", "value": isp, "inline": True},
-                        {"name": "Cihaz", "value": user_agent[:100], "inline": False}
-                    ],
-                    "footer": {
-                        "text": "Zaman: " + datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-                    }
-                }
-
-                payload = {"embeds": [embed_mesaj, embed_log]}
-
-                try:
-                    requests.post(discord_webhook, json=payload)
-                    logging.info("[DISCORD] 2 kutu gönderildi (mesaj + log)")
-                except Exception as e:
-                    logging.error(f"[DISCORD HATASI] {str(e)}")
-
-            return render_template_string(HOME_HTML, username=username, success=True)
-
-    return render_template_string(HOME_HTML, username=username, success=False)
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+                        country = geo.get('country
