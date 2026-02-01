@@ -64,6 +64,7 @@ MESAJLAR_HTML = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>itiraf_ipal - Mesajlar</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { background: linear-gradient(135deg, #000000, #1a0033); color: white; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 20px; }
         h1 { text-align: center; font-size: 3rem; margin-bottom: 30px; background: linear-gradient(90deg, #ff00cc, #3333ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -81,10 +82,38 @@ MESAJLAR_HTML = """
         .username { font-size: 1.8rem; font-weight: bold; margin-bottom: 10px; }
         .message { font-size: 1.4rem; margin-bottom: 10px; }
         .footer { font-size: 0.9rem; opacity: 0.8; text-align: center; margin-top: 10px; }
-        .share-btn { background: white; color: #ff00cc; border: none; padding: 12px 30px; border-radius: 50px; cursor: pointer; font-weight: bold; margin-top: 15px; display: block; margin-left: auto; margin-right: auto; }
+        .download-btn { background: white; color: #ff00cc; border: none; padding: 12px 30px; border-radius: 50px; cursor: pointer; font-weight: bold; margin-top: 15px; display: block; margin-left: auto; margin-right: auto; }
     </style>
 </head>
 <body>
+    <h1>Gelen Mesajlar</h1>
+    {% if messages %}
+        {% for msg in messages %}
+            <div class="message-box" id="msg-box-{{ loop.index }}">
+                <div class="username">@{{ msg.username or 'Anonim' }}</div>
+                <div class="message">{{ msg.message }}</div>
+                <div class="footer">sent with ♥ from team NGL by itiraf_ipal</div>
+                <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Resmi İndir (Instagram için)</button>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Henüz mesaj yok.</p>
+    {% endif %}
+
+    <script>
+        function downloadBox(boxId) {
+            const box = document.getElementById(boxId);
+            html2canvas(box).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'ngl_mesaj.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
+"""
     <h1>Gelen Mesajlar</h1>
     {% if messages %}
         {% for msg in messages %}
