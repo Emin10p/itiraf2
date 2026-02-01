@@ -56,6 +56,7 @@ HOME_HTML = """
 </body>
 </html>
 """
+
 MESAJLAR_HTML = """
 <!DOCTYPE html>
 <html lang="tr">
@@ -65,94 +66,98 @@ MESAJLAR_HTML = """
     <title>itiraf_ipal - Mesajlar</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body { 
-            background: linear-gradient(135deg, #0f001a, #1a0033, #2a004d);
-            color: white; 
-            font-family: 'Helvetica Neue', Arial, sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            min-height: 100vh; 
+        body {
+            background: linear-gradient(135deg, #0f001a, #1a0033, #2a004d, #4b0082);
+            color: white;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow-y: auto;
         }
-        h1 { 
-            text-align: center; 
-            font-size: 3rem; 
-            margin: 30px 0; 
-            background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffff); 
-            -webkit-background-clip: text; 
-            -webkit-text-fill-color: transparent; 
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin: 40px 0 30px;
+            background: linear-gradient(90deg, #ff00cc, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .container {
+        .story-preview {
+            width: 100%;
+            max-width: 480px;
+            height: 85vh;
+            margin: 20px auto;
+            background: linear-gradient(135deg, #ff00cc, #8a2be2, #4b0082);
+            border-radius: 28px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            position: relative;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: flex-start;
-            min-height: 100vh;
-            padding-top: 10vh;
+            align-items: center;
+            padding: 60px 30px 40px;
         }
-        .message-box {
-            background: linear-gradient(135deg, #ff00cc, #8a2be2, #4b0082);
-            border-radius: 24px;
-            padding: 40px 30px;
-            margin-bottom: 40px;
-            width: 90%;
-            max-width: 480px;
-            box-shadow: 0 15px 40px rgba(255, 0, 204, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.15);
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-        .message-box::before {
+        .story-preview::before {
             content: '';
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-            opacity: 0.6;
+            background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 60%);
+            opacity: 0.5;
+            pointer-events: none;
         }
-        .username { 
-            font-size: 2.2rem; 
-            font-weight: bold; 
-            margin-bottom: 20px; 
-            text-align: center; 
+        .username {
+            font-size: 2.4rem;
+            font-weight: bold;
+            margin-bottom: 20px;
             text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            text-align: center;
         }
-        .message { 
-            font-size: 1.6rem; 
-            margin-bottom: 25px; 
-            text-align: center; 
+        .message {
+            font-size: 1.8rem;
             line-height: 1.5;
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
         }
-        .footer { 
-            font-size: 1rem; 
-            opacity: 0.85; 
-            text-align: center; 
-            margin-top: 20px;
+        .footer {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            text-align: center;
+            margin-top: auto;
+            padding-top: 20px;
         }
-        .admin-footer { 
-            font-size: 0.9rem; 
-            opacity: 0.6; 
-            text-align: center; 
-            margin-top: 60px; 
-            color: #ccc; 
+        .admin-footer {
+            font-size: 0.9rem;
+            opacity: 0.6;
+            text-align: center;
+            margin-top: 60px;
+            color: #ddd;
         }
-        .download-btn { 
-            background: rgba(255,255,255,0.15); 
-            color: white; 
-            border: 2px solid white; 
-            padding: 14px 40px; 
-            border-radius: 50px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            margin-top: 30px; 
-            font-size: 1.1rem; 
+        .download-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 14px 40px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 30px auto;
+            font-size: 1.1rem;
+            backdrop-filter: blur(5px);
             transition: all 0.3s;
         }
-        .download-btn:hover { 
-            background: white; 
-            color: #ff00cc; 
-            transform: scale(1.05); 
+        .download-btn:hover {
+            background: white;
+            color: #ff00cc;
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -161,40 +166,35 @@ MESAJLAR_HTML = """
         <h1>Gelen Mesajlar</h1>
         {% if messages %}
             {% for msg in messages %}
-                <div class="message-box" id="msg-box-{{ loop.index }}">
+                <div class="story-preview" id="msg-box-{{ loop.index }}">
                     <div class="username">@{{ msg.username or 'Anonim' }}</div>
                     <div class="message">{{ msg.message }}</div>
                     <div class="footer">sent with ♥ from team NGL</div>
-                    <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Story'ye Kaydet</button>
+                    <div class="admin-footer">@ipal_itiraf</div>
+                    <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Story'ye Kaydet (İndir)</button>
                 </div>
             {% endfor %}
-            <div class="admin-footer">İtiraf_ipal tarafından yapılmıştır</div>
         {% else %}
             <p>Henüz mesaj yok.</p>
         {% endif %}
     </div>
-
     <script>
         function downloadBox(boxId) {
             const box = document.getElementById(boxId);
             const buttons = box.getElementsByTagName('button');
             for (let btn of buttons) {
-                btn.style.display = 'none';  // butonu resimde gizle
+                btn.style.display = 'none'; // butonu gizle (resimde görünmesin)
             }
-
             html2canvas(box, {
-                scale: 3,               // yüksek çözünürlük
-                backgroundColor: null,  // şeffaf arka plan
-                width: box.offsetWidth,
-                height: box.offsetHeight,
-                windowWidth: box.offsetWidth,
-                windowHeight: box.offsetHeight
+                scale: 3, // yüksek kaliteli
+                backgroundColor: null,
+                useCORS: true,
+                logging: false
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = 'ngl_story_mesaj.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-
                 // Butonu geri göster
                 for (let btn of buttons) {
                     btn.style.display = 'block';
@@ -210,39 +210,7 @@ MESAJLAR_HTML = """
 </body>
 </html>
 """
-    <h1>Gelen Mesajlar</h1>
-    {% if messages %}
-        {% for msg in messages %}
-            <div class="message-box" id="msg-box-{{ loop.index }}">
-                <div class="username">@{{ msg.username or 'Anonim' }}</div>
-                <div class="message">{{ msg.message }}</div>
-                <div class="footer">sent with ♥ from team NGL by itiraf_ipal</div>
-                <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Kutuyu Resim Olarak İndir</button>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>Henüz mesaj yok.</p>
-    {% endif %}
-
-    <script>
-        function downloadBox(boxId) {
-            const box = document.getElementById(boxId);
-            html2canvas(box, {scale: 2}).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'ngl_mesaj.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            }).catch(err => {
-                alert("Resim oluşturulamadı: " + err);
-            });
-        }
-    </script>
-</body>
-</html>
-"""
-
 messages = []
-
 @app.route('/', methods=['GET', 'POST'])
 def home():
     username = request.args.get('username', '') or request.form.get('username', '')
@@ -260,9 +228,7 @@ def home():
                 client_ip = request.headers['X-Real-IP'].strip()
             else:
                 client_ip = request.remote_addr or '127.0.0.1'
-
             user_agent = request.headers.get('User-Agent', 'Bilinmiyor')[:200]
-
             location = "Konum alınamadı"
             isp = "Bilinmiyor"
             if client_ip not in ['127.0.0.1', '::1']:
@@ -276,25 +242,19 @@ def home():
                         isp = geo.get('isp', 'Bilinmiyor')
                 except:
                     pass
-
             log_entry = f"@{username or 'Anonim'} | MESAJ: {msg} | IP: {client_ip} | KONUM: {location} | ISP: {isp} | UA: {user_agent}"
             logging.info(log_entry)
             print(f"[YENİ MESAJ] {log_entry}")
-
             messages.append({
                 "username": username or 'Anonim',
                 "message": msg,
                 "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S")
             })
-
             return render_template_string(HOME_HTML, username=username, success=True)
-
     return render_template_string(HOME_HTML, username=username, success=False)
-
 @app.route('/mesajlar')
 def mesajlar():
     return render_template_string(MESAJLAR_HTML, messages=messages)
-
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
