@@ -76,8 +76,8 @@ MESAJLAR_HTML = """
         }
         h1 {
             text-align: center;
-            font-size: 2.5rem;
-            margin: 40px 0 30px;
+            font-size: 2.1rem;
+            margin: 10px 0 30px;
             background: linear-gradient(90deg, #ff00cc, #00ffff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
