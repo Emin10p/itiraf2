@@ -56,7 +56,6 @@ HOME_HTML = """
 </body>
 </html>
 """
-
 MESAJLAR_HTML = """
 <!DOCTYPE html>
 <html lang="tr">
@@ -66,26 +65,151 @@ MESAJLAR_HTML = """
     <title>itiraf_ipal - Mesajlar</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body { background: linear-gradient(135deg, #000000, #1a0033); color: white; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 20px; }
-        h1 { text-align: center; font-size: 3rem; margin-bottom: 30px; background: linear-gradient(90deg, #ff00cc, #3333ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .message-box {
-            background: linear-gradient(135deg, #ff00cc, #3333ff);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-            color: white;
+        body { 
+            background: linear-gradient(135deg, #0f001a, #1a0033, #2a004d);
+            color: white; 
+            font-family: 'Helvetica Neue', Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            min-height: 100vh; 
         }
-        .username { font-size: 1.8rem; font-weight: bold; margin-bottom: 10px; }
-        .message { font-size: 1.4rem; margin-bottom: 10px; }
-        .footer { font-size: 0.9rem; opacity: 0.8; text-align: center; margin-top: 10px; }
-        .download-btn { background: white; color: #ff00cc; border: none; padding: 12px 30px; border-radius: 50px; cursor: pointer; font-weight: bold; margin-top: 15px; display: block; margin-left: auto; margin-right: auto; }
+        h1 { 
+            text-align: center; 
+            font-size: 3rem; 
+            margin: 30px 0; 
+            background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffff); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            padding-top: 10vh;
+        }
+        .message-box {
+            background: linear-gradient(135deg, #ff00cc, #8a2be2, #4b0082);
+            border-radius: 24px;
+            padding: 40px 30px;
+            margin-bottom: 40px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: 0 15px 40px rgba(255, 0, 204, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.15);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .message-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            opacity: 0.6;
+        }
+        .username { 
+            font-size: 2.2rem; 
+            font-weight: bold; 
+            margin-bottom: 20px; 
+            text-align: center; 
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .message { 
+            font-size: 1.6rem; 
+            margin-bottom: 25px; 
+            text-align: center; 
+            line-height: 1.5;
+        }
+        .footer { 
+            font-size: 1rem; 
+            opacity: 0.85; 
+            text-align: center; 
+            margin-top: 20px;
+        }
+        .admin-footer { 
+            font-size: 0.9rem; 
+            opacity: 0.6; 
+            text-align: center; 
+            margin-top: 60px; 
+            color: #ccc; 
+        }
+        .download-btn { 
+            background: rgba(255,255,255,0.15); 
+            color: white; 
+            border: 2px solid white; 
+            padding: 14px 40px; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            margin-top: 30px; 
+            font-size: 1.1rem; 
+            transition: all 0.3s;
+        }
+        .download-btn:hover { 
+            background: white; 
+            color: #ff00cc; 
+            transform: scale(1.05); 
+        }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Gelen Mesajlar</h1>
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="message-box" id="msg-box-{{ loop.index }}">
+                    <div class="username">@{{ msg.username or 'Anonim' }}</div>
+                    <div class="message">{{ msg.message }}</div>
+                    <div class="footer">sent with ♥ from team NGL</div>
+                    <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Story'ye Kaydet</button>
+                </div>
+            {% endfor %}
+            <div class="admin-footer">İtiraf_ipal tarafından yapılmıştır</div>
+        {% else %}
+            <p>Henüz mesaj yok.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        function downloadBox(boxId) {
+            const box = document.getElementById(boxId);
+            const buttons = box.getElementsByTagName('button');
+            for (let btn of buttons) {
+                btn.style.display = 'none';  // butonu resimde gizle
+            }
+
+            html2canvas(box, {
+                scale: 3,               // yüksek çözünürlük
+                backgroundColor: null,  // şeffaf arka plan
+                width: box.offsetWidth,
+                height: box.offsetHeight,
+                windowWidth: box.offsetWidth,
+                windowHeight: box.offsetHeight
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'ngl_story_mesaj.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+                // Butonu geri göster
+                for (let btn of buttons) {
+                    btn.style.display = 'block';
+                }
+            }).catch(err => {
+                alert("Resim oluşturulamadı: " + err);
+                for (let btn of buttons) {
+                    btn.style.display = 'block';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+"""
     <h1>Gelen Mesajlar</h1>
     {% if messages %}
         {% for msg in messages %}
