@@ -57,8 +57,7 @@ HOME_HTML = """
     {% endif %}
 </body>
 </html>
-"""
-MESAJLAR_HTML = """
+"""MESAJLAR_HTML = """
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -98,6 +97,7 @@ MESAJLAR_HTML = """
             flex-direction: column;
             align-items: center;
             padding: 80px 25px 60px;
+            box-sizing: border-box;
         }
         .inner-box {
             background: rgba(0, 0, 0, 0.8);
@@ -191,40 +191,34 @@ MESAJLAR_HTML = """
     <script>
         function downloadBox(boxId) {
             const box = document.getElementById(boxId);
-            const buttons = box.getElementsByTagName('button');
-            for (let btn of buttons) {
-                btn.style.display = 'none';
+            if (!box) {
+                alert("Kutu bulunamadı knk");
+                return;
             }
 
-            // Buton gizlendikten sonra kutuyu yeniden boyutlandır
-            box.style.paddingBottom = '20px';
+            const buttons = box.querySelectorAll('button');
+            buttons.forEach(btn => btn.style.display = 'none');
 
             html2canvas(box, {
-                scale: 3.2,
+                scale: 2.0,  // düşük scale ile mobil'de çalışır
                 backgroundColor: null,
                 useCORS: true,
                 logging: false,
                 allowTaint: true,
                 foreignObjectRendering: true,
                 width: box.offsetWidth,
-                height: box.offsetHeight
+                height: box.offsetHeight,
+                dpi: 192
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = 'itiraf_story_' + Date.now() + '.png';
-                link.href = canvas.toDataURL('image/png');
+                link.href = canvas.toDataURL('image/png', 1.0);
                 link.click();
 
-                // Butonu geri getir
-                for (let btn of buttons) {
-                    btn.style.display = 'block';
-                }
-                box.style.paddingBottom = ''; // eski haline döndür
+                buttons.forEach(btn => btn.style.display = 'block');
             }).catch(err => {
-                alert("İndirme başarısız: " + err + "\nKutuya uzun bas + 'Resmi kaydet' dene.");
-                for (let btn of buttons) {
-                    btn.style.display = 'block';
-                }
-                box.style.paddingBottom = '';
+                alert("İndirme patladı: " + err + "\\nKutuya uzun bas + 'Resmi kaydet' dene knk.");
+                buttons.forEach(btn => btn.style.display = 'block');
             });
         }
     </script>
