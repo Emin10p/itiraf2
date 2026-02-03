@@ -57,7 +57,9 @@ HOME_HTML = """
     {% endif %}
 </body>
 </html>
-"""MESAJLAR_HTML = """
+"""
+
+MESAJLAR_HTML = """
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -67,7 +69,7 @@ HOME_HTML = """
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
-            background: #0d0000;
+            background: linear-gradient(135deg, #0d0000, #1a0000);
             color: #fff;
             font-family: 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
@@ -76,96 +78,102 @@ HOME_HTML = """
         }
         h1 {
             text-align: center;
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             margin: 40px 0 30px;
             background: linear-gradient(90deg, #ff1a1a, #cc0000);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .story-preview {
-            width: 92%;
-            max-width: 380px;
-            min-height: 740px;
-            margin: 30px auto 60px;
+            width: 90%;
+            max-width: 400px;
+            min-height: 800px;
+            margin: 20px auto;
             background: linear-gradient(135deg, #1a0000, #330000, #4d0000);
-            border-radius: 18px;
-            border: 1px solid #660000;
-            box-shadow: 0 12px 40px rgba(204, 0, 0, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 15px 50px rgba(204, 0, 0, 0.4);
+            color: white;
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            justify-content: flex-start;
             align-items: center;
-            padding: 80px 25px 60px;
-            box-sizing: border-box;
+            padding: 90px 30px 60px;
+        }
+        .story-preview::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,0,0,0.12) 0%, transparent 60%);
+            opacity: 0.4;
+            pointer-events: none;
         }
         .inner-box {
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 14px;
-            width: 94%;
+            background: rgba(0, 0, 0, 0.65);
+            border-radius: 16px;
+            width: 90%;
             aspect-ratio: 16 / 9;
             display: flex;
             flex-direction: column;
-            padding: 0;
-            box-shadow: inset 0 0 20px rgba(204, 0, 0, 0.4);
-            margin-bottom: 50px;
-            overflow: hidden;
-            position: relative;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            box-shadow: inset 0 0 20px rgba(204, 0, 0, 0.5);
+            margin-bottom: 40px;
         }
         .username {
-            position: absolute;
-            top: -18px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 1.45rem;
-            font-weight: 900;
-            background: #cc0000;
-            color: #fff;
-            padding: 6px 24px;
-            border-radius: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-            white-space: nowrap;
+            font-size: 1.9rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
             text-align: center;
-            z-index: 2;
-            border: 1px solid #ff3333;
+            width: 100%;
+            color: #ffdddd;
         }
         .message {
             font-size: 1.6rem;
             line-height: 1.5;
             text-align: center;
-            padding: 45px 20px 20px;
             overflow-wrap: break-word;
             word-break: break-word;
             hyphens: auto;
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffdddd;
+            color: #ffcccc;
+        }
+        .footer {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            text-align: center;
+            margin-top: auto;
+            padding-top: 30px;
+            color: #ff6666;
         }
         .admin-footer {
-            font-size: 0.8rem;
-            opacity: 0.5;
+            font-size: 0.9rem;
+            opacity: 0.6;
             text-align: center;
-            margin-top: 35px;
+            margin-top: 60px;
             color: #999;
         }
         .download-btn {
-            background: linear-gradient(90deg, #cc0000, #990000);
+            background: rgba(204,0,0,0.3);
             color: white;
-            border: none;
-            padding: 12px 40px;
+            border: 2px solid #cc0000;
+            padding: 14px 40px;
             border-radius: 50px;
             cursor: pointer;
             font-weight: bold;
-            margin: 25px auto 0;
-            font-size: 1rem;
-            box-shadow: 0 6px 20px rgba(204, 0, 0, 0.5);
+            margin: 30px auto;
+            font-size: 1.1rem;
             transition: all 0.3s;
         }
         .download-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(204, 0, 0, 0.7);
+            background: #cc0000;
+            border-color: #ff3333;
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -179,8 +187,9 @@ HOME_HTML = """
                         <div class="username">@{{ msg.username or 'Anonim' }}</div>
                         <div class="message">{{ msg.message }}</div>
                     </div>
-                    <div class="admin-footer">@ipal_itiraf tarafından tasarlandı</div>
-                    <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Story'ye Kaydet</button>
+                    <div class="footer">@itiraf_ipal</div>
+                    <div class="admin-footer">@itiraf_ipal tarafından tasarlandı</div>
+                    <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Story'ye Kaydet (İndir)</button>
                 </div>
             {% endfor %}
         {% else %}
@@ -191,40 +200,39 @@ HOME_HTML = """
     <script>
         function downloadBox(boxId) {
             const box = document.getElementById(boxId);
-            if (!box) {
-                alert("Kutu bulunamadı knk");
-                return;
+            const buttons = box.getElementsByTagName('button');
+            for (let btn of buttons) {
+                btn.style.display = 'none';
             }
 
-            const buttons = box.querySelectorAll('button');
-            buttons.forEach(btn => btn.style.display = 'none');
-
             html2canvas(box, {
-                scale: 2.0,  // düşük scale ile mobil'de çalışır
+                scale: 4,
                 backgroundColor: null,
                 useCORS: true,
                 logging: false,
-                allowTaint: true,
-                foreignObjectRendering: true,
-                width: box.offsetWidth,
-                height: box.offsetHeight,
-                dpi: 192
+                windowWidth: box.scrollWidth,
+                windowHeight: box.scrollHeight
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'itiraf_story_' + Date.now() + '.png';
-                link.href = canvas.toDataURL('image/png', 1.0);
+                link.download = 'ngl_story_mesaj.png';
+                link.href = canvas.toDataURL('image/png');
                 link.click();
 
-                buttons.forEach(btn => btn.style.display = 'block');
+                for (let btn of buttons) {
+                    btn.style.display = 'block';
+                }
             }).catch(err => {
-                alert("İndirme patladı: " + err + "\\nKutuya uzun bas + 'Resmi kaydet' dene knk.");
-                buttons.forEach(btn => btn.style.display = 'block');
+                alert("Resim oluşturulamadı: " + err + "\\nKutuya uzun bas + 'Resmi kaydet' dene knk.");
+                for (let btn of buttons) {
+                    btn.style.display = 'block';
+                }
             });
         }
     </script>
 </body>
 </html>
 """
+
 LOGS_HTML = """
 <!DOCTYPE html>
 <html lang="tr">
@@ -340,34 +348,13 @@ def home():
                 "timestamp": datetime.now().strftime("%d.%m.%Y %H:%M:%S")
             })
 
-            # Telegram'a bildirim gönder (yeni mesaj geldiğinde)
-            telegram_token = "8273909643:AAGuxhXLAr4sQainh0LiDmizHe6TyGRK7zo"
-            telegram_chat_id = "5952518860"
-
-            if telegram_token and telegram_chat_id:
-                message_text = f"Yeni mesaj geldi!\n\nKullanıcı: @{username or 'Anonim'}\nMesaj: {msg}\nZaman: {datetime.now().strftime('%H:%M %d.%m.%Y')}"
-                url = f"https://api.telegram.org/bot{telegram_token}/sendMessage"
-                payload = {
-                    "chat_id": telegram_chat_id,
-                    "text": message_text,
-                    "parse_mode": "HTML"
-                }
-                try:
-                    response = requests.post(url, json=payload)
-                    if response.status_code == 200:
-                        logging.info("[TELEGRAM] Bildirim başarıyla gönderildi")
-                    else:
-                        logging.error(f"[TELEGRAM HATASI] Status: {response.status_code} - {response.text}")
-                except Exception as e:
-                    logging.error(f"[TELEGRAM HATASI] {str(e)}")
-
             return render_template_string(HOME_HTML, username=username, success=True)
 
     return render_template_string(HOME_HTML, username=username, success=False)
 
 @app.route('/mesajlar')
 def mesajlar():
-    return render_template_string(MESAJLAR_HTML, messages=messages)
+    return render_template_string(MESAJLAR_HTML, messages=messages[::-1])
 
 @app.route('/logs')
 def logs():
