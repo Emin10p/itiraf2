@@ -68,8 +68,8 @@ MESAJLAR_HTML = """
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
-            background: linear-gradient(135deg, #0f001a, #1a0033, #2a004d, #4b0082);
-            color: white;
+            background: #0a0000;
+            color: #fff;
             font-family: 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
             padding: 0;
@@ -77,91 +77,101 @@ MESAJLAR_HTML = """
         }
         h1 {
             text-align: center;
-            font-size: 2.5rem;
-            margin: 40px 0 30px;
-            background: linear-gradient(90deg, #ff00cc, #00ffff);
+            font-size: 2.8rem;
+            margin: 35px 0 25px;
+            background: linear-gradient(90deg, #ff0033, #cc0000);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .story-preview {
-            width: 90%;
-            max-width: 380px; /* biraz daralttık, story'ye daha uyumlu */
-            min-height: 720px; /* story oranına yakın */
-            margin: 30px auto 60px;
-            background: linear-gradient(135deg, #ff00cc, #8a2be2, #4b0082);
-            border-radius: 20px; /* köşeleri biraz yumuşattık */
-            box-shadow: 0 10px 40px rgba(255, 0, 204, 0.3);
-            color: white;
+            width: 92%;
+            max-width: 380px;
+            min-height: 740px;
+            margin: 25px auto 50px;
+            background: linear-gradient(135deg, #1a0000, #330000, #4d0000);
+            border-radius: 18px;
+            border: 1px solid #660000;
+            box-shadow: 0 12px 40px rgba(204, 0, 0, 0.25);
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
             align-items: center;
-            padding: 80px 25px 60px;
+            padding: 70px 25px 60px;
         }
         .inner-box {
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 16px;
-            width: 92%;
+            background: rgba(0, 0, 0, 0.75);
+            border-radius: 14px;
+            width: 94%;
             aspect-ratio: 16 / 9;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 25px;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.6);
-            margin-bottom: 45px;
+            padding: 0;
+            box-shadow: inset 0 0 15px rgba(204, 0, 0, 0.3);
+            margin-bottom: 50px;
             overflow: hidden;
+            position: relative;
         }
         .username {
-            font-size: 1.85rem;
-            font-weight: bold;
-            margin-bottom: 12px;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.45rem;
+            font-weight: 900;
+            background: #cc0000;
+            color: #fff;
+            padding: 6px 24px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            white-space: nowrap;
             text-align: center;
-            width: 100%;
+            z-index: 2;
         }
         .message {
             font-size: 1.55rem;
             line-height: 1.45;
             text-align: center;
+            padding: 40px 20px 20px;
             overflow-wrap: break-word;
             word-break: break-word;
             hyphens: auto;
-            max-height: 55%; /* taşmayı engelle */
-            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .footer {
             font-size: 1rem;
-            opacity: 0.85;
+            opacity: 0.8;
             text-align: center;
             margin-top: auto;
-            padding-top: 25px;
+            padding: 25px 0 10px;
+            color: #ff6666;
         }
         .admin-footer {
             font-size: 0.8rem;
-            opacity: 0.55;
+            opacity: 0.5;
             text-align: center;
-            margin-top: 35px;
-            color: #ccc;
+            margin-top: 30px;
+            color: #999;
         }
         .download-btn {
-            background: rgba(255,255,255,0.18);
+            background: linear-gradient(90deg, #cc0000, #990000);
             color: white;
-            border: 1px solid rgba(255,255,255,0.4);
-            padding: 12px 35px;
+            border: none;
+            padding: 12px 40px;
             border-radius: 50px;
             cursor: pointer;
             font-weight: bold;
             margin: 25px auto 0;
             font-size: 1rem;
-            backdrop-filter: blur(6px);
+            box-shadow: 0 4px 15px rgba(204, 0, 0, 0.4);
             transition: all 0.25s;
         }
         .download-btn:hover {
-            background: rgba(255,255,255,0.35);
-            transform: scale(1.04);
+            transform: scale(1.06);
+            box-shadow: 0 8px 25px rgba(204, 0, 0, 0.6);
         }
     </style>
 </head>
@@ -175,7 +185,8 @@ MESAJLAR_HTML = """
                         <div class="username">@{{ msg.username or 'Anonim' }}</div>
                         <div class="message">{{ msg.message }}</div>
                     </div>
-                    <div class="admin-footer">@itiraf_ipal tarafından tasarlandı</div>
+                    <div class="footer">@ipal_itiraf tarafından tasarlandı</div>
+                    <div class="admin-footer"></div>
                     <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Story'ye Kaydet</button>
                 </div>
             {% endfor %}
@@ -193,16 +204,14 @@ MESAJLAR_HTML = """
             }
 
             html2canvas(box, {
-                scale: 3,                  // 4 yerine 3 yaptık, bozulma azalır
+                scale: 3,
                 backgroundColor: null,
                 useCORS: true,
                 logging: false,
                 allowTaint: true,
                 foreignObjectRendering: true,
                 width: box.offsetWidth,
-                height: box.offsetHeight,
-                windowWidth: box.scrollWidth,
-                windowHeight: box.scrollHeight
+                height: box.offsetHeight
             }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = 'ngl_story_' + Date.now() + '.png';
@@ -213,7 +222,7 @@ MESAJLAR_HTML = """
                     btn.style.display = 'block';
                 }
             }).catch(err => {
-                alert("İndirme hatası: " + err + "\nUzun basıp 'Resmi kaydet' dene.");
+                alert("İndirme hatası: " + err + "\nUzun bas + 'Resmi kaydet' dene.");
                 for (let btn of buttons) {
                     btn.style.display = 'block';
                 }
@@ -223,9 +232,6 @@ MESAJLAR_HTML = """
 </body>
 </html>
 """
-
-
-
 
 
 LOGS_HTML = """
