@@ -68,7 +68,7 @@ MESAJLAR_HTML = """
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
-            background: #0a0000;
+            background: #0d0000;
             color: #fff;
             font-family: 'Helvetica Neue', Arial, sans-serif;
             margin: 0;
@@ -78,8 +78,8 @@ MESAJLAR_HTML = """
         h1 {
             text-align: center;
             font-size: 2.8rem;
-            margin: 35px 0 25px;
-            background: linear-gradient(90deg, #ff0033, #cc0000);
+            margin: 40px 0 30px;
+            background: linear-gradient(90deg, #ff1a1a, #cc0000);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -87,52 +87,54 @@ MESAJLAR_HTML = """
             width: 92%;
             max-width: 380px;
             min-height: 740px;
-            margin: 25px auto 50px;
+            margin: 30px auto 60px;
             background: linear-gradient(135deg, #1a0000, #330000, #4d0000);
             border-radius: 18px;
             border: 1px solid #660000;
-            box-shadow: 0 12px 40px rgba(204, 0, 0, 0.25);
+            box-shadow: 0 12px 40px rgba(204, 0, 0, 0.3);
+            color: white;
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 70px 25px 60px;
+            padding: 80px 25px 60px;
         }
         .inner-box {
-            background: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.8);
             border-radius: 14px;
             width: 94%;
             aspect-ratio: 16 / 9;
             display: flex;
             flex-direction: column;
             padding: 0;
-            box-shadow: inset 0 0 15px rgba(204, 0, 0, 0.3);
+            box-shadow: inset 0 0 20px rgba(204, 0, 0, 0.4);
             margin-bottom: 50px;
             overflow: hidden;
             position: relative;
         }
         .username {
             position: absolute;
-            top: -18px;
+            top: -20px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 1.45rem;
+            font-size: 1.5rem;
             font-weight: 900;
             background: #cc0000;
             color: #fff;
-            padding: 6px 24px;
-            border-radius: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            padding: 8px 28px;
+            border-radius: 40px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.7);
             white-space: nowrap;
             text-align: center;
             z-index: 2;
+            border: 1px solid #ff3333;
         }
         .message {
-            font-size: 1.55rem;
-            line-height: 1.45;
+            font-size: 1.6rem;
+            line-height: 1.5;
             text-align: center;
-            padding: 40px 20px 20px;
+            padding: 45px 20px 20px;
             overflow-wrap: break-word;
             word-break: break-word;
             hyphens: auto;
@@ -140,10 +142,11 @@ MESAJLAR_HTML = """
             display: flex;
             align-items: center;
             justify-content: center;
+            color: #ffdddd;
         }
         .footer {
             font-size: 1rem;
-            opacity: 0.8;
+            opacity: 0.75;
             text-align: center;
             margin-top: auto;
             padding: 25px 0 10px;
@@ -153,7 +156,7 @@ MESAJLAR_HTML = """
             font-size: 0.8rem;
             opacity: 0.5;
             text-align: center;
-            margin-top: 30px;
+            margin-top: 35px;
             color: #999;
         }
         .download-btn {
@@ -166,12 +169,12 @@ MESAJLAR_HTML = """
             font-weight: bold;
             margin: 25px auto 0;
             font-size: 1rem;
-            box-shadow: 0 4px 15px rgba(204, 0, 0, 0.4);
-            transition: all 0.25s;
+            box-shadow: 0 6px 20px rgba(204, 0, 0, 0.5);
+            transition: all 0.3s;
         }
         .download-btn:hover {
-            transform: scale(1.06);
-            box-shadow: 0 8px 25px rgba(204, 0, 0, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(204, 0, 0, 0.7);
         }
     </style>
 </head>
@@ -185,8 +188,8 @@ MESAJLAR_HTML = """
                         <div class="username">@{{ msg.username or 'Anonim' }}</div>
                         <div class="message">{{ msg.message }}</div>
                     </div>
-                    <div class="footer">@ipal_itiraf tarafından tasarlandı</div>
-                    <div class="admin-footer"></div>
+                    <div class="footer"></div>
+                    <div class="admin-footer">@ipal_itiraf tarafından tasarlandı</div>
                     <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Story'ye Kaydet</button>
                 </div>
             {% endfor %}
@@ -204,7 +207,7 @@ MESAJLAR_HTML = """
             }
 
             html2canvas(box, {
-                scale: 3,
+                scale: 3.5,
                 backgroundColor: null,
                 useCORS: true,
                 logging: false,
@@ -232,7 +235,6 @@ MESAJLAR_HTML = """
 </body>
 </html>
 """
-
 
 LOGS_HTML = """
 <!DOCTYPE html>
