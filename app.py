@@ -92,7 +92,6 @@ MESAJLAR_HTML = """
             border-radius: 18px;
             border: 1px solid #660000;
             box-shadow: 0 12px 40px rgba(204, 0, 0, 0.3);
-            color: white;
             position: relative;
             overflow: hidden;
             display: flex;
@@ -115,16 +114,16 @@ MESAJLAR_HTML = """
         }
         .username {
             position: absolute;
-            top: -20px;
+            top: -18px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 1.5rem;
+            font-size: 1.45rem;
             font-weight: 900;
             background: #cc0000;
             color: #fff;
-            padding: 8px 28px;
-            border-radius: 40px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.7);
+            padding: 6px 24px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
             white-space: nowrap;
             text-align: center;
             z-index: 2;
@@ -143,14 +142,6 @@ MESAJLAR_HTML = """
             align-items: center;
             justify-content: center;
             color: #ffdddd;
-        }
-        .footer {
-            font-size: 1rem;
-            opacity: 0.75;
-            text-align: center;
-            margin-top: auto;
-            padding: 25px 0 10px;
-            color: #ff6666;
         }
         .admin-footer {
             font-size: 0.8rem;
@@ -188,7 +179,6 @@ MESAJLAR_HTML = """
                         <div class="username">@{{ msg.username or 'Anonim' }}</div>
                         <div class="message">{{ msg.message }}</div>
                     </div>
-                    <div class="footer"></div>
                     <div class="admin-footer">@ipal_itiraf tarafından tasarlandı</div>
                     <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Story'ye Kaydet</button>
                 </div>
@@ -206,8 +196,11 @@ MESAJLAR_HTML = """
                 btn.style.display = 'none';
             }
 
+            // Buton gizlendikten sonra kutuyu yeniden boyutlandır
+            box.style.paddingBottom = '20px';
+
             html2canvas(box, {
-                scale: 3.5,
+                scale: 3.2,
                 backgroundColor: null,
                 useCORS: true,
                 logging: false,
@@ -217,25 +210,27 @@ MESAJLAR_HTML = """
                 height: box.offsetHeight
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'ngl_story_' + Date.now() + '.png';
+                link.download = 'itiraf_story_' + Date.now() + '.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
 
+                // Butonu geri getir
                 for (let btn of buttons) {
                     btn.style.display = 'block';
                 }
+                box.style.paddingBottom = ''; // eski haline döndür
             }).catch(err => {
-                alert("İndirme hatası: " + err + "\nUzun bas + 'Resmi kaydet' dene.");
+                alert("İndirme başarısız: " + err + "\nKutuya uzun bas + 'Resmi kaydet' dene.");
                 for (let btn of buttons) {
                     btn.style.display = 'block';
                 }
+                box.style.paddingBottom = '';
             });
         }
     </script>
 </body>
 </html>
 """
-
 LOGS_HTML = """
 <!DOCTYPE html>
 <html lang="tr">
