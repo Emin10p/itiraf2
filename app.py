@@ -58,7 +58,6 @@ HOME_HTML = """
 </body>
 </html>
 """
-
 MESAJLAR_HTML = """
 <!DOCTYPE html>
 <html lang="tr">
@@ -68,32 +67,116 @@ MESAJLAR_HTML = """
     <title>itiraf_ipal - Mesajlar</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        body { background: linear-gradient(135deg, #0f001a, #1a0033, #2a004d, #4b0082); color: white; font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; min-height: 100vh; }
-        h1 { text-align: center; font-size: 2.5rem; margin: 40px 0 30px; background: linear-gradient(90deg, #ff00cc, #00ffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .story-preview { width: 90%; max-width: 400px; min-height: 800px; margin: 20px auto; background: linear-gradient(135deg, #ff00cc, #8a2be2, #4b0082); border-radius: 12px; box-shadow: 0 15px 50px rgba(255, 0, 204, 0.4); color: white; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; padding: 90px 30px 60px; }
-        .story-preview::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 60%); opacity: 0.5; pointer-events: none; }
-        .inner-box { background: rgba(0, 0, 0, 0.45); border-radius: 16px; width: 90%; aspect-ratio: 16 / 9; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); margin-bottom: 40px; }
-        .username { font-size: 1.9rem; font-weight: bold; margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.6); text-align: center; width: 100%; }
-        .message { font-size: 1.6rem; line-height: 1.5; text-align: center; overflow-wrap: break-word; word-break: break-word; hyphens: auto; }
-        .footer { font-size: 1.1rem; opacity: 0.9; text-align: center; margin-top: auto; padding-top: 30px; }
-        .admin-footer { font-size: 0.85rem; opacity: 0.6; text-align: center; margin-top: 40px; color: #ddd; }
-        .download-btn { background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 14px 40px; border-radius: 50px; cursor: pointer; font-weight: bold; margin: 30px auto; font-size: 1.1rem; backdrop-filter: blur(5px); transition: all 0.3s; }
-        .download-btn:hover { background: white; color: #ff00cc; transform: scale(1.05); }
+        body {
+            background: linear-gradient(135deg, #0f001a, #1a0033, #2a004d, #4b0082);
+            color: white;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin: 40px 0 30px;
+            background: linear-gradient(90deg, #ff00cc, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .story-preview {
+            width: 90%;
+            max-width: 380px; /* biraz daralttık, story'ye daha uyumlu */
+            min-height: 720px; /* story oranına yakın */
+            margin: 30px auto 60px;
+            background: linear-gradient(135deg, #ff00cc, #8a2be2, #4b0082);
+            border-radius: 20px; /* köşeleri biraz yumuşattık */
+            box-shadow: 0 10px 40px rgba(255, 0, 204, 0.3);
+            color: white;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 80px 25px 60px;
+        }
+        .inner-box {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 16px;
+            width: 92%;
+            aspect-ratio: 16 / 9;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.6);
+            margin-bottom: 45px;
+            overflow: hidden;
+        }
+        .username {
+            font-size: 1.85rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+            text-align: center;
+            width: 100%;
+        }
+        .message {
+            font-size: 1.55rem;
+            line-height: 1.45;
+            text-align: center;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+            max-height: 55%; /* taşmayı engelle */
+            overflow-y: auto;
+        }
+        .footer {
+            font-size: 1rem;
+            opacity: 0.85;
+            text-align: center;
+            margin-top: auto;
+            padding-top: 25px;
+        }
+        .admin-footer {
+            font-size: 0.8rem;
+            opacity: 0.55;
+            text-align: center;
+            margin-top: 35px;
+            color: #ccc;
+        }
+        .download-btn {
+            background: rgba(255,255,255,0.18);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.4);
+            padding: 12px 35px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 25px auto 0;
+            font-size: 1rem;
+            backdrop-filter: blur(6px);
+            transition: all 0.25s;
+        }
+        .download-btn:hover {
+            background: rgba(255,255,255,0.35);
+            transform: scale(1.04);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Gelen Mesajlar</h1>
         {% if messages %}
-            {% for msg in messages %}
+            {% for msg in messages[::-1] %}
                 <div class="story-preview" id="msg-box-{{ loop.index }}">
                     <div class="inner-box">
                         <div class="username">@{{ msg.username or 'Anonim' }}</div>
                         <div class="message">{{ msg.message }}</div>
                     </div>
-                    <div class="footer">@itiraf_ipal</div>
-                    <div class="admin-footer">@ipal_itiraf tarafından tasarlandı</div>
-                    <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Story'ye Kaydet (İndir)</button>
+                    <div class="admin-footer">@itiraf_ipal tarafından tasarlandı</div>
+                    <button class="download-btn" onclick="downloadBox('msg-box-{{ loop.index }}')">Story'ye Kaydet</button>
                 </div>
             {% endfor %}
         {% else %}
@@ -108,23 +191,29 @@ MESAJLAR_HTML = """
             for (let btn of buttons) {
                 btn.style.display = 'none';
             }
+
             html2canvas(box, {
-                scale: 4,
+                scale: 3,                  // 4 yerine 3 yaptık, bozulma azalır
                 backgroundColor: null,
                 useCORS: true,
                 logging: false,
+                allowTaint: true,
+                foreignObjectRendering: true,
+                width: box.offsetWidth,
+                height: box.offsetHeight,
                 windowWidth: box.scrollWidth,
                 windowHeight: box.scrollHeight
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = 'ngl_story_mesaj.png';
+                link.download = 'ngl_story_' + Date.now() + '.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
+
                 for (let btn of buttons) {
                     btn.style.display = 'block';
                 }
             }).catch(err => {
-                alert("Resim oluşturulamadı: " + err);
+                alert("İndirme hatası: " + err + "\nUzun basıp 'Resmi kaydet' dene.");
                 for (let btn of buttons) {
                     btn.style.display = 'block';
                 }
@@ -134,6 +223,10 @@ MESAJLAR_HTML = """
 </body>
 </html>
 """
+
+
+
+
 
 LOGS_HTML = """
 <!DOCTYPE html>
